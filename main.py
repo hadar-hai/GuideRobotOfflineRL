@@ -259,15 +259,18 @@ while running:
     # Update the local environment rectangle around player 1
     local_env_rect = pygame.Rect(player1.rect.centerx - LEASH_MAX_LENGTH - 5, player1.rect.centery - LEASH_MAX_LENGTH - 5, local_env_width, local_env_height)
 
-    # Check if the goal is in the local environment of the main player
+     # Check if the goal is in the local environment of the main player
     if not goal_reached and local_env_rect.colliderect(goal.rect):
-        # End the game
-        goal_reached = True
-        print("You reached the goal!")
-        goal_text = FONT.render("You reached the goal!", True, GREEN)
-        window.blit(goal_text, (WIDTH // 2 - goal_text.get_width() // 2, HEIGHT // 2 - goal_text.get_height() // 2))
-        pygame.display.update()
-        pygame.time.wait(5000)  # Wait for 5 seconds
+        # Check if the goal is within 10 units of the main player
+        distance_to_goal = math.sqrt((player1.rect.centerx - goal.rect.centerx) ** 2 + (player1.rect.centery - goal.rect.centery) ** 2)
+        if distance_to_goal <= LEASH_MAX_LENGTH:
+            # End the game
+            goal_reached = True
+            print("You reached the goal!")
+            goal_text = FONT.render("You reached the goal!", True, GREEN)
+            window.blit(goal_text, (WIDTH // 2 - goal_text.get_width() // 2, HEIGHT // 2 - goal_text.get_height() // 2))
+            pygame.display.update()
+            pygame.time.wait(5000)  # Wait for 5 seconds
 
     # Draw local environment around player 1
     local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
