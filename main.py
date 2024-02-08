@@ -198,8 +198,8 @@ for _ in range(NUM_OBSTACLES):
     obstacles.append(Obstacle(obstacle_x, obstacle_y, obstacle_width, obstacle_height))
 
 # Create the local environment window
-local_env_width = LEASH_MAX_LENGTH * 2 + 10
-local_env_height = LEASH_MAX_LENGTH * 2 + 10
+local_env_width = LEASH_MAX_LENGTH * 2 + 50
+local_env_height = LEASH_MAX_LENGTH * 2 + 50
 local_env_window = pygame.Surface((local_env_width, local_env_height))
 
 # Goal class
@@ -278,7 +278,7 @@ while running:
 
     # Draw the local environment window onto the main window
     window.blit(local_env_window, (WIDTH - local_env_width - 10, HEIGHT - local_env_height - 10))
-    
+
     # Update display
     pygame.display.update()
 
