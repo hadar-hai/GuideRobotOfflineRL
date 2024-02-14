@@ -77,20 +77,8 @@ class Leash:
         # Calculate distance between players
         dist = math.sqrt((self.player1.rect.centerx - self.player2.rect.centerx) ** 2 +
                          (self.player1.rect.centery - self.player2.rect.centery) ** 2)
+        return dist
         
-        # If the distance exceeds the maximum length, move player2 towards player1
-        if dist > self.length:
-            angle = math.atan2(self.player1.rect.centery - self.player2.rect.centery,
-                               self.player1.rect.centerx - self.player2.rect.centerx)
-            dx = int(self.length * math.cos(angle))
-            dy = int(self.length * math.sin(angle))
-            pygame.draw.line(window, GREEN, self.player2.rect.center, self.player1.rect.center, 5)
-            pygame.display.update()  # Update display to show the line
-            new_x = self.player2.rect.x + dx
-            new_y = self.player2.rect.y + dy
-            new_rect = pygame.Rect(new_x, new_y, PLAYER_SIZE, PLAYER_SIZE)
-            if not any(obstacle.collides_with_circle(new_x, new_y, PLAYER_SIZE // 2) for obstacle in obstacles):
-                self.player2.rect.center = (new_x, new_y)
 
 # Obstacle class
 class Obstacle:
@@ -232,18 +220,48 @@ while running:
 
     # Get the state of all keys
     keys = pygame.key.get_pressed()
+    leash_dist = leash.update()
 
-    # Move player 1
-    dx, dy = 0, 0
-    if keys[pygame.K_LEFT]:
-        dx = -PLAYER_SPEED
-    if keys[pygame.K_RIGHT]:
-        dx = PLAYER_SPEED
-    if keys[pygame.K_UP]:
-        dy = -PLAYER_SPEED
-    if keys[pygame.K_DOWN]:
-        dy = PLAYER_SPEED
-    player1.move(dx, dy)
+    if leash_dist <= leash.length:
+        # Move player 1
+        dx_player1, dy_player1 = 0, 0
+        if keys[pygame.K_LEFT]:
+            dx_player1 = -PLAYER_SPEED
+        if keys[pygame.K_RIGHT]:
+            dx_player1 = PLAYER_SPEED
+        if keys[pygame.K_UP]:
+            dy_player1 = -PLAYER_SPEED
+        if keys[pygame.K_DOWN]:
+            dy_player1 = PLAYER_SPEED
+        player1.move(dx_player1, dy_player1)
+    
+    
+    # If the distance exceeds the maximum length, unable player2 movement 
+    if leash_dist > leash.length and leash_dist < leash.length + 5:
+        # angle = math.atan2(player1.rect.centery - player2.rect.centery,
+        #                        player1.rect.centerx - player2.rect.centerx)
+        # dx = int(self.length * math.cos(angle))
+        # dy = int(self.length * math.sin(angle))
+        pygame.draw.line(window, GREEN, player2.rect.center, player1.rect.center, 5)
+        # pygame.display.update()  # Update display to show the line
+        # new_x = self.player2.rect.x + dx
+        # new_y = self.player2.rect.y + dy
+        # new_rect = pygame.Rect(new_x, new_y, PLAYER_SIZE, PLAYER_SIZE)
+        # if not any(obstacle.collides_with_circle(new_x, new_y, PLAYER_SIZE // 2) for obstacle in obstacles):
+        #     self.player2.rect.center = (new_x, new_y)
+            
+        # Move player 2
+        dx_player2, dy_player2 = 0, 0
+        if keys[pygame.K_a]:
+            dx_player2 = -PLAYER_SPEED
+        if keys[pygame.K_d]:
+            dx_player2 = PLAYER_SPEED
+        if keys[pygame.K_w]:
+            dy_player2 = -PLAYER_SPEED
+        if keys[pygame.K_x]:
+            dy_player2 = PLAYER_SPEED
+        player2.move(dx_player2, dy_player2)
+
 
     # Update leash position
     leash.update()
