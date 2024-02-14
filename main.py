@@ -219,7 +219,7 @@ running = True
 goal_reached = False
 while running:
     window.fill(WHITE)
-    local_env_window.fill(WHITE)  # Clear the local environment window
+    # local_env_window.fill(WHITE)  # Clear the local environment window
 
     # Handle events
     for event in pygame.event.get():
@@ -272,12 +272,12 @@ while running:
             pygame.display.update()
             pygame.time.wait(5000)  # Wait for 5 seconds
 
-    # Draw local environment around player 1
-    local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
-    pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
+    # # Draw local environment around player 1
+    # local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
+    # pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
 
-    # Draw the local environment window onto the main window
-    window.blit(local_env_window, (WIDTH - local_env_width - 10, HEIGHT - local_env_height - 10))
+    # # Draw the local environment window onto the main window
+    # window.blit(local_env_window, (WIDTH - local_env_width - 10, HEIGHT - local_env_height - 10))
 
     # Update display
     pygame.display.update()
