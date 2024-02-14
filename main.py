@@ -1,7 +1,13 @@
-import pygame
-import sys
+
 import math
 import random
+import sys
+import threading
+
+
+import tkinter as tk
+from tkinter import Tk, Label
+import pygame
 
 # Initialize Pygame
 pygame.init()
@@ -23,12 +29,62 @@ FONT = pygame.font.Font(None, 36)
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2D Map Game")
 
+# Tkinter setup for displaying movement instructions
+def run_tkinter_gui(shared_commands):
+    # Function to update the movement command
+    def update_command(x, y):
+        shared_commands["dx"] = x
+        shared_commands["dy"] = y
+
+    # Function to update the instruction label with the latest command
+    def update_instruction():
+        instruction = shared_commands.get("instruction", "Ready")
+        instruction_label.config(text=instruction)
+        # Schedule this function to be called again after 100 milliseconds
+        root.after(100, update_instruction)
+
+    root = tk.Tk()
+    root.title("Control Panel for Player 2")
+
+    # Improve visual layout and fonts
+    title_font = ("Helvetica", 16, "bold")
+    instruction_font = ("Helvetica", 24, "bold")
+    button_font = ("Helvetica", 12)
+
+    # Section title for instructions
+
+    tk.Label(root, text="Instruction:", font=title_font).pack()
+    # Display the current instruction with a larger font
+    instruction_label = tk.Label(root, text="Instruction: Ready", font=instruction_font)
+    instruction_label.pack(pady=(5, 20))  # Add some padding for visual separation
+
+    # Section title for controls
+    tk.Label(root, text="Control Movement:", font=title_font).pack()
+
+    # Control buttons with specified fonts
+    tk.Button(root, text="Left", font=button_font, command=lambda: update_command(-PLAYER_SPEED, 0)).pack(side=tk.LEFT, expand=True)
+    tk.Button(root, text="Right", font=button_font, command=lambda: update_command(PLAYER_SPEED, 0)).pack(side=tk.RIGHT, expand=True)
+    tk.Button(root, text="Up", font=button_font, command=lambda: update_command(0, -PLAYER_SPEED)).pack(side=tk.LEFT, expand=True)
+    tk.Button(root, text="Down", font=button_font, command=lambda: update_command(0, PLAYER_SPEED)).pack(side=tk.RIGHT, expand=True)
+
+    # Initialize the instruction update loop
+    update_instruction()
+
+    root.mainloop()
+shared_commands = {
+    "dx": 0,  # Change in x-position for the secondary player
+    "dy": 0,  # Change in y-position for the secondary player
+    "instruction": "Ready"  # Current movement instruction
+}
+
+
+
 # Main_Player class
 class Main_Player:
     def __init__(self, x, y, color=RED):
         self.rect = pygame.Rect(x, y, PLAYER_SIZE, PLAYER_SIZE)
         self.color = color
-        
+
     def update_other_player(self, other_player: 'Secondary_Player' = None):
         self.other_player = other_player
 
@@ -37,31 +93,41 @@ class Main_Player:
 
     def move(self, dx, dy):
         new_rect = self.rect.move(dx, dy)
-        if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in obstacles) and not any(obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx, self.other_player.rect.centery) for obstacle in obstacles):
+        if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in
+                   obstacles) and not any(
+                obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
+                                            self.other_player.rect.centery) for obstacle in obstacles):
             self.rect = new_rect
-        else: 
+        else:
             collision_text = FONT.render("Collision!", True, RED)
-            window.blit(collision_text, (WIDTH // 2 - collision_text.get_width() // 2, HEIGHT // 2 - collision_text.get_height() // 2))
+            window.blit(collision_text,
+                        (WIDTH // 2 - collision_text.get_width() // 2, HEIGHT // 2 - collision_text.get_height() // 2))
+
 
 # Secondary_Player class
 class Secondary_Player:
     def __init__(self, x, y, color=BLUE):
         self.rect = pygame.Rect(x, y, PLAYER_SIZE, PLAYER_SIZE)
         self.color = color
-        
+
     def update_other_player(self, other_player: 'Secondary_Player' = None):
         self.other_player = other_player
-        
+
     def draw(self):
         pygame.draw.circle(window, self.color, self.rect.center, PLAYER_SIZE // 2)
 
     def move(self, dx, dy):
         new_rect = self.rect.move(dx, dy)
-        if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in obstacles) and not any(obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx, self.other_player.rect.centery) for obstacle in obstacles):
+        if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in
+                   obstacles) and not any(
+                obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
+                                            self.other_player.rect.centery) for obstacle in obstacles):
             self.rect = new_rect
-        else: 
+        else:
             collision_text = FONT.render("Collision!", True, RED)
-            window.blit(collision_text, (WIDTH // 2 - collision_text.get_width() // 2, HEIGHT // 2 - collision_text.get_height() // 2))
+            window.blit(collision_text,
+                        (WIDTH // 2 - collision_text.get_width() // 2, HEIGHT // 2 - collision_text.get_height() // 2))
+
 
 # Leash class
 class Leash:
@@ -77,20 +143,8 @@ class Leash:
         # Calculate distance between players
         dist = math.sqrt((self.player1.rect.centerx - self.player2.rect.centerx) ** 2 +
                          (self.player1.rect.centery - self.player2.rect.centery) ** 2)
-        
-        # If the distance exceeds the maximum length, move player2 towards player1
-        if dist > self.length:
-            angle = math.atan2(self.player1.rect.centery - self.player2.rect.centery,
-                               self.player1.rect.centerx - self.player2.rect.centerx)
-            dx = int(self.length * math.cos(angle))
-            dy = int(self.length * math.sin(angle))
-            pygame.draw.line(window, GREEN, self.player2.rect.center, self.player1.rect.center, 5)
-            pygame.display.update()  # Update display to show the line
-            new_x = self.player2.rect.x + dx
-            new_y = self.player2.rect.y + dy
-            new_rect = pygame.Rect(new_x, new_y, PLAYER_SIZE, PLAYER_SIZE)
-            if not any(obstacle.collides_with_circle(new_x, new_y, PLAYER_SIZE // 2) for obstacle in obstacles):
-                self.player2.rect.center = (new_x, new_y)
+        return dist
+
 
 # Obstacle class
 class Obstacle:
@@ -121,7 +175,7 @@ class Obstacle:
         # Check collision with corner of the obstacle
         corner_dist_sq = (dist_x - self.rect.width / 2) ** 2 + (dist_y - self.rect.height / 2) ** 2
         return corner_dist_sq <= (radius ** 2)
-    
+
     def collides_with_line(self, x1, y1, x2, y2):
         # Check if the line segment intersects with the obstacle
         line_rect = pygame.Rect(min(x1, x2), min(y1, y2), abs(x2 - x1), abs(y2 - y1))
@@ -180,6 +234,7 @@ class Obstacle:
 
         return False
 
+
 # Create players, leash, and obstacles
 player1 = Main_Player(50, 50)
 player2 = Secondary_Player(50, 50, color=BLUE)  # Second player attached to the first
@@ -202,6 +257,7 @@ local_env_width = LEASH_MAX_LENGTH * 2 + 50
 local_env_height = LEASH_MAX_LENGTH * 2 + 50
 local_env_window = pygame.Surface((local_env_width, local_env_height))
 
+
 # Goal class
 class Goal:
     def __init__(self, x, y, size=20, color=GREEN):
@@ -211,12 +267,18 @@ class Goal:
     def draw(self):
         pygame.draw.rect(window, self.color, self.rect)
 
+
 # Create the goal
 goal = Goal(random.randint(0, WIDTH - 20), random.randint(0, HEIGHT - 20))
 
 # Main game loop
 running = True
 goal_reached = False
+# Start the Tkinter thread
+# Start Tkinter in a separate thread
+tk_thread = threading.Thread(target=run_tkinter_gui, args=(shared_commands,))
+tk_thread.daemon = True
+tk_thread.start()
 while running:
     window.fill(WHITE)
     # local_env_window.fill(WHITE)  # Clear the local environment window
@@ -225,25 +287,68 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-            
+
     # Draw obstacles
     for obstacle in obstacles:
         obstacle.draw()
 
     # Get the state of all keys
     keys = pygame.key.get_pressed()
+    leash_dist = leash.update()
 
-    # Move player 1
-    dx, dy = 0, 0
-    if keys[pygame.K_LEFT]:
-        dx = -PLAYER_SPEED
-    if keys[pygame.K_RIGHT]:
-        dx = PLAYER_SPEED
-    if keys[pygame.K_UP]:
-        dy = -PLAYER_SPEED
-    if keys[pygame.K_DOWN]:
-        dy = PLAYER_SPEED
-    player1.move(dx, dy)
+    if leash_dist <= leash.length:
+        # Move player 1
+        dx_player1, dy_player1 = 0, 0
+        if keys[pygame.K_LEFT]:
+            dx_player1 = -PLAYER_SPEED
+            shared_commands["instruction"]= "Move Left"
+        if keys[pygame.K_RIGHT]:
+            dx_player1 = PLAYER_SPEED
+            shared_commands["instruction"]= "Move Right"
+        if keys[pygame.K_UP]:
+            dy_player1 = -PLAYER_SPEED
+            shared_commands["instruction"]= "Move Up"
+        if keys[pygame.K_DOWN]:
+            dy_player1 = PLAYER_SPEED
+            shared_commands["instruction"]= "Move Down"
+        player1.move(dx_player1, dy_player1)
+
+    # If the distance exceeds the maximum length, unable player2 movement
+    print("leash dist",leash_dist)
+    if leash_dist > leash.length and leash_dist < leash.length + 5:
+        # angle = math.atan2(player1.rect.centery - player2.rect.centery,
+        #                        player1.rect.centerx - player2.rect.centerx)
+        # dx = int(self.length * math.cos(angle))
+        # dy = int(self.length * math.sin(angle))
+        #pygame.draw.line(window, GREEN, player2.rect.center, player1.rect.center, 5)
+        #pygame.display.update()  # Update display to show the line
+        #new_x = self.player2.rect.x + dx
+        # new_y = self.player2.rect.y + dy
+        # new_rect = pygame.Rect(new_x, new_y, PLAYER_SIZE, PLAYER_SIZE)
+        # if not any(obstacle.collides_with_circle(new_x, new_y, PLAYER_SIZE // 2) for obstacle in obstacles):
+        #     self.player2.rect.center = (new_x, new_y)
+        """
+            dx_player2, dy_player2 = 0, 0
+    if keys[pygame.K_a]:
+        dx_player2 = -PLAYER_SPEED
+    if keys[pygame.K_d]:
+        dx_player2 = PLAYER_SPEED
+    if keys[pygame.K_w]:
+        dy_player2 = -PLAYER_SPEED
+    if keys[pygame.K_x]:
+        dy_player2 = PLAYER_SPEED
+
+    player2.move(dx_player2, dy_player2)"""
+        # Move player 2
+        pass
+    dx_player2 = shared_commands["dx"]
+    dy_player2 = shared_commands["dy"]
+
+    player2.move(dx_player2, dy_player2)
+
+    # Reset dx, dy in shared_commands after moving
+    shared_commands["dx"] = 0
+    shared_commands["dy"] = 0
 
     # Update leash position
     leash.update()
@@ -257,12 +362,14 @@ while running:
     goal.draw()
 
     # Update the local environment rectangle around player 1
-    local_env_rect = pygame.Rect(player1.rect.centerx - LEASH_MAX_LENGTH - 5, player1.rect.centery - LEASH_MAX_LENGTH - 5, local_env_width, local_env_height)
+    local_env_rect = pygame.Rect(player1.rect.centerx - LEASH_MAX_LENGTH - 5,
+                                 player1.rect.centery - LEASH_MAX_LENGTH - 5, local_env_width, local_env_height)
 
-     # Check if the goal is in the local environment of the main player
+    # Check if the goal is in the local environment of the main player
     if not goal_reached and local_env_rect.colliderect(goal.rect):
         # Check if the goal is within 10 units of the main player
-        distance_to_goal = math.sqrt((player1.rect.centerx - goal.rect.centerx) ** 2 + (player1.rect.centery - goal.rect.centery) ** 2)
+        distance_to_goal = math.sqrt(
+            (player1.rect.centerx - goal.rect.centerx) ** 2 + (player1.rect.centery - goal.rect.centery) ** 2)
         if distance_to_goal <= LEASH_MAX_LENGTH:
             # End the game
             goal_reached = True
@@ -273,8 +380,8 @@ while running:
             pygame.time.wait(5000)  # Wait for 5 seconds
 
     # # Draw local environment around player 1
-    # local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
-    # pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
+    #local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
+    #pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
 
     # # Draw the local environment window onto the main window
     # window.blit(local_env_window, (WIDTH - local_env_width - 10, HEIGHT - local_env_height - 10))
@@ -293,3 +400,4 @@ while running:
 # Quit Pygame
 pygame.quit()
 sys.exit()
+
