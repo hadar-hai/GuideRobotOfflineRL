@@ -18,6 +18,7 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 FONT = pygame.font.Font(None, 36)
+FONT2 = pygame.font.Font(None, 24)  # Change the font size if necessary
 
 # Create the game window
 window = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -205,7 +206,9 @@ goal = Goal(random.randint(0, WIDTH - 20), random.randint(0, HEIGHT - 20))
 # Main game loop
 running = True
 goal_reached = False
+i = 0
 while running:
+    i += 1
     window.fill(WHITE)
     # local_env_window.fill(WHITE)  # Clear the local environment window
 
@@ -222,7 +225,7 @@ while running:
     keys = pygame.key.get_pressed()
     leash_dist = leash.update()
 
-    if leash_dist <= leash.length:
+    if leash_dist <= leash.length - 1:
         # Move player 1
         dx_player1, dy_player1 = 0, 0
         if keys[pygame.K_LEFT]:
@@ -236,8 +239,8 @@ while running:
         player1.move(dx_player1, dy_player1)
     
     
-    # If the distance exceeds the maximum length, unable player2 movement 
-    if leash_dist > leash.length and leash_dist < leash.length + 5:
+    # If the distance is the maximum length, unable player2 movement 
+    if leash_dist == leash.length:
         # angle = math.atan2(player1.rect.centery - player2.rect.centery,
         #                        player1.rect.centerx - player2.rect.centerx)
         # dx = int(self.length * math.cos(angle))
@@ -260,9 +263,21 @@ while running:
             dy_player2 = -PLAYER_SPEED
         if keys[pygame.K_x]:
             dy_player2 = PLAYER_SPEED
+        
+        next_leash_dist = math.sqrt((player1.rect.centerx - player2.rect.centerx - dx_player2) ** 2 + (player1.rect.centery - player2.rect.centery - dy_player2) ** 2)
+        
+        if dx_player2 !=0 or dy_player2 !=0:
+            print("player 1 position : ", player1.rect.centerx, player1.rect.centery)
+            print("player 2 position : ", player2.rect.centerx, player2.rect.centery)
+            print("next leash distance : ", next_leash_dist)
+            print("leash length : ", leash.length)
+            print("dx_player2 : ", dx_player2)
+            print("dy_player2 : ", dy_player2)
+        if next_leash_dist >= leash.length:
+            player1.move(dx_player2, dy_player2)
+            
         player2.move(dx_player2, dy_player2)
-
-
+        
     # Update leash position
     leash.update()
 
@@ -273,6 +288,11 @@ while running:
 
     # Draw the goal
     goal.draw()
+        
+    # Render leash size as text
+    leash_size_text = FONT2.render("Leash Size: " + str(round(leash_dist)), True, BLACK)
+    # Display leash size text on the screen
+    window.blit(leash_size_text, (10, 10))
 
     # Update the local environment rectangle around player 1
     local_env_rect = pygame.Rect(player1.rect.centerx - LEASH_MAX_LENGTH - 5, player1.rect.centery - LEASH_MAX_LENGTH - 5, local_env_width, local_env_height)
@@ -306,7 +326,7 @@ while running:
         running = False
 
     # Limit frames per second
-    pygame.time.Clock().tick(30)
+    pygame.time.Clock().tick(40)
 
 # Quit Pygame
 pygame.quit()
