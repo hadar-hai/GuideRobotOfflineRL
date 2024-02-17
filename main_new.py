@@ -17,7 +17,7 @@ pygame.init()
 
 # Constants
 # Screen dimensions
-WIDTH = screen_width - 100
+WIDTH = (screen_width - 100) // 2
 HEIGHT = screen_height - 100
 PLAYER_SIZE = 10
 PLAYER_SPEED = 1
@@ -31,8 +31,11 @@ FONT = pygame.font.Font(None, 36)
 FONT2 = pygame.font.Font(None, 24)  # Change the font size if necessary
 
 # Create the game window
-window = pygame.display.set_mode((WIDTH, HEIGHT))
+window = pygame.display.set_mode((screen_width - 100, HEIGHT))
 pygame.display.set_caption("2D Map Game")
+
+# Fill the left half of the screen with black
+window.fill(BLACK, (0, 0, WIDTH, HEIGHT))
 
 # Main_Player class
 class Main_Player:
@@ -52,7 +55,7 @@ class Main_Player:
             self.rect = new_rect
         else: 
             collision_text = FONT.render("Collision!", True, RED)
-            window.blit(collision_text, (WIDTH // 2 - collision_text.get_width() // 2, HEIGHT // 2 - collision_text.get_height() // 2))
+            window.blit(collision_text, (WIDTH + (screen_width - WIDTH) // 2 - collision_text.get_width() // 2, HEIGHT // 2 - collision_text.get_height() // 2))
 
 # Secondary_Player class
 class Secondary_Player:
@@ -89,7 +92,6 @@ class Leash:
         dist = math.sqrt((self.player1.rect.centerx - self.player2.rect.centerx) ** 2 +
                          (self.player1.rect.centery - self.player2.rect.centery) ** 2)
         return dist
-        
                   
 # Obstacle class
 class Obstacle:
@@ -180,8 +182,8 @@ class Obstacle:
         return False
 
 # Create players, leash, and obstacles
-player1 = Main_Player(50, 50)
-player2 = Secondary_Player(50, 50, color=BLUE)  # Second player attached to the first
+player1 = Main_Player(WIDTH + 50, 50)
+player2 = Secondary_Player(WIDTH + 50, 50, color=BLUE)  # Second player attached to the first
 player1.update_other_player(player2)
 player2.update_other_player(player1)
 leash = Leash(player1, player2, LEASH_MAX_LENGTH)
@@ -192,7 +194,7 @@ NUM_OBSTACLES = 30
 for _ in range(NUM_OBSTACLES):
     obstacle_width = random.randint(30, 100)
     obstacle_height = random.randint(30, 100)
-    obstacle_x = random.randint(0, WIDTH - obstacle_width)
+    obstacle_x = random.randint(WIDTH, screen_width - obstacle_width)
     obstacle_y = random.randint(0, HEIGHT - obstacle_height)
     obstacles.append(Obstacle(obstacle_x, obstacle_y, obstacle_width, obstacle_height))
 
@@ -211,7 +213,7 @@ class Goal:
         pygame.draw.rect(window, self.color, self.rect)
 
 # Create the goal
-goal = Goal(random.randint(0, WIDTH - 20), random.randint(0, HEIGHT - 20))
+goal = Goal(random.randint(WIDTH, screen_width - 20), random.randint(0, HEIGHT - 20))
 
 # Main game loop
 running = True
@@ -219,7 +221,7 @@ goal_reached = False
 i = 0
 while running:
     i += 1
-    window.fill(WHITE)
+    window.fill(WHITE, (WIDTH, 0, WIDTH, HEIGHT))
     # local_env_window.fill(WHITE)  # Clear the local environment window
 
     # Handle events
@@ -251,29 +253,8 @@ while running:
     
     # If the distance is the maximum length, unable player2 movement 
     if leash_dist == leash.length:
-        # angle = math.atan2(player1.rect.centery - player2.rect.centery,
-        #                        player1.rect.centerx - player2.rect.centerx)
-        # dx = int(self.length * math.cos(angle))
-        # dy = int(self.length * math.sin(angle))
         pygame.draw.line(window, GREEN, player2.rect.center, player1.rect.center, 5)
-        # pygame.display.update()  # Update display to show the line
-        # new_x = self.player2.rect.x + dx
-        # new_y = self.player2.rect.y + dy
-        # new_rect = pygame.Rect(new_x, new_y, PLAYER_SIZE, PLAYER_SIZE)
-        # if not any(obstacle.collides_with_circle(new_x, new_y, PLAYER_SIZE // 2) for obstacle in obstacles):
-        #     self.player2.rect.center = (new_x, new_y)
-        # Calculate the angle between player2 and player1
-        angle = math.atan2(player1.rect.centery - player2.rect.centery,
-                           player1.rect.centerx - player2.rect.centerx)
         
-        dx = math.cos(angle)
-        dy = math.sin(angle)
-        angle = math.degrees(angle)
-        print_arrow_window(angle)
-
-
-            # print("You should move", direction)
-            
         # Move player 2
         dx_player2, dy_player2 = 0, 0
         if keys[pygame.K_a]:
@@ -289,13 +270,7 @@ while running:
         
         if dx_player2 !=0 or dy_player2 !=0:
             print("Got you!")
-        # if dx_player2 !=0 or dy_player2 !=0:
-        #     print("player 1 position : ", player1.rect.centerx, player1.rect.centery)
-        #     print("player 2 position : ", player2.rect.centerx, player2.rect.centery)
-        #     print("next leash distance : ", next_leash_dist)
-        #     print("leash length : ", leash.length)
-        #     print("dx_player2 : ", dx_player2)
-        #     print("dy_player2 : ", dy_player2)
+        
         if next_leash_dist >= leash.length:
             player1.move(dx_player2, dy_player2)
             
@@ -315,7 +290,7 @@ while running:
     # Render leash size as text
     leash_size_text = FONT2.render("Leash Size: " + str(round(leash_dist)), True, BLACK)
     # Display leash size text on the screen
-    window.blit(leash_size_text, (10, 10))
+    window.blit(leash_size_text, (WIDTH + 10, 10))
 
     # Update the local environment rectangle around player 1
     local_env_rect = pygame.Rect(player1.rect.centerx - LEASH_MAX_LENGTH - 5, player1.rect.centery - LEASH_MAX_LENGTH - 5, local_env_width, local_env_height)
@@ -329,7 +304,7 @@ while running:
             goal_reached = True
             print("You reached the goal!")
             goal_text = FONT.render("You reached the goal!", True, GREEN)
-            window.blit(goal_text, (WIDTH // 2 - goal_text.get_width() // 2, HEIGHT // 2 - goal_text.get_height() // 2))
+            window.blit(goal_text, (WIDTH + (screen_width - WIDTH) // 2 - goal_text.get_width() // 2, HEIGHT // 2 - goal_text.get_height() // 2))
             pygame.display.update()
             pygame.time.wait(5000)  # Wait for 5 seconds
 
