@@ -1,9 +1,8 @@
-
+import sys
 import math
 import random
 import sys
 import threading
-
 
 import tkinter as tk
 from tkinter import Tk, Label
@@ -29,54 +28,22 @@ FONT = pygame.font.Font(None, 36)
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2D Map Game")
 
-# Tkinter setup for displaying movement instructions
-def run_tkinter_gui(shared_commands):
-    # Function to update the movement command
-    def update_command(x, y):
-        shared_commands["dx"] = x
-        shared_commands["dy"] = y
 
-    # Function to update the instruction label with the latest command
+def run_tkinter_gui(shared_instructions):
     def update_instruction():
-        instruction = shared_commands.get("instruction", "Ready")
+        instruction = shared_instructions.get("instruction", "Ready")
         instruction_label.config(text=instruction)
-        # Schedule this function to be called again after 100 milliseconds
         root.after(100, update_instruction)
 
     root = tk.Tk()
-    root.title("Control Panel for Player 2")
-
-    # Improve visual layout and fonts
-    title_font = ("Helvetica", 16, "bold")
-    instruction_font = ("Helvetica", 24, "bold")
-    button_font = ("Helvetica", 12)
-
-    # Section title for instructions
-
-    tk.Label(root, text="Instruction:", font=title_font).pack()
-    # Display the current instruction with a larger font
-    instruction_label = tk.Label(root, text="Instruction: Ready", font=instruction_font)
-    instruction_label.pack(pady=(5, 20))  # Add some padding for visual separation
-
-    # Section title for controls
-    tk.Label(root, text="Control Movement:", font=title_font).pack()
-
-    # Control buttons with specified fonts
-    tk.Button(root, text="Left", font=button_font, command=lambda: update_command(-PLAYER_SPEED, 0)).pack(side=tk.LEFT, expand=True)
-    tk.Button(root, text="Right", font=button_font, command=lambda: update_command(PLAYER_SPEED, 0)).pack(side=tk.RIGHT, expand=True)
-    tk.Button(root, text="Up", font=button_font, command=lambda: update_command(0, -PLAYER_SPEED)).pack(side=tk.LEFT, expand=True)
-    tk.Button(root, text="Down", font=button_font, command=lambda: update_command(0, PLAYER_SPEED)).pack(side=tk.RIGHT, expand=True)
-
-    # Initialize the instruction update loop
+    root.title("Instructions for Player 2")
+    instruction_label = tk.Label(root, text="Ready", font=("Helvetica", 24, "bold"))
+    instruction_label.pack()
     update_instruction()
-
     root.mainloop()
-shared_commands = {
-    "dx": 0,  # Change in x-position for the secondary player
-    "dy": 0,  # Change in y-position for the secondary player
-    "instruction": "Ready"  # Current movement instruction
-}
 
+
+shared_commands = {"instruction": "Ready"}
 
 
 # Main_Player class
@@ -95,8 +62,8 @@ class Main_Player:
         new_rect = self.rect.move(dx, dy)
         if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in
                    obstacles) and not any(
-                obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
-                                            self.other_player.rect.centery) for obstacle in obstacles):
+            obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
+                                        self.other_player.rect.centery) for obstacle in obstacles):
             self.rect = new_rect
         else:
             collision_text = FONT.render("Collision!", True, RED)
@@ -120,8 +87,8 @@ class Secondary_Player:
         new_rect = self.rect.move(dx, dy)
         if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in
                    obstacles) and not any(
-                obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
-                                            self.other_player.rect.centery) for obstacle in obstacles):
+            obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
+                                        self.other_player.rect.centery) for obstacle in obstacles):
             self.rect = new_rect
         else:
             collision_text = FONT.render("Collision!", True, RED)
@@ -301,28 +268,28 @@ while running:
         dx_player1, dy_player1 = 0, 0
         if keys[pygame.K_LEFT]:
             dx_player1 = -PLAYER_SPEED
-            shared_commands["instruction"]= "Move Left"
+            shared_commands["instruction"] = "Move Left"
         if keys[pygame.K_RIGHT]:
             dx_player1 = PLAYER_SPEED
-            shared_commands["instruction"]= "Move Right"
+            shared_commands["instruction"] = "Move Right"
         if keys[pygame.K_UP]:
             dy_player1 = -PLAYER_SPEED
-            shared_commands["instruction"]= "Move Up"
+            shared_commands["instruction"] = "Move Up"
         if keys[pygame.K_DOWN]:
             dy_player1 = PLAYER_SPEED
-            shared_commands["instruction"]= "Move Down"
+            shared_commands["instruction"] = "Move Down"
         player1.move(dx_player1, dy_player1)
 
     # If the distance exceeds the maximum length, unable player2 movement
-    print("leash dist",leash_dist)
+    print("leash dist", leash_dist)
     if leash_dist > leash.length and leash_dist < leash.length + 5:
         # angle = math.atan2(player1.rect.centery - player2.rect.centery,
         #                        player1.rect.centerx - player2.rect.centerx)
         # dx = int(self.length * math.cos(angle))
         # dy = int(self.length * math.sin(angle))
-        #pygame.draw.line(window, GREEN, player2.rect.center, player1.rect.center, 5)
-        #pygame.display.update()  # Update display to show the line
-        #new_x = self.player2.rect.x + dx
+        # pygame.draw.line(window, GREEN, player2.rect.center, player1.rect.center, 5)
+        # pygame.display.update()  # Update display to show the line
+        # new_x = self.player2.rect.x + dx
         # new_y = self.player2.rect.y + dy
         # new_rect = pygame.Rect(new_x, new_y, PLAYER_SIZE, PLAYER_SIZE)
         # if not any(obstacle.collides_with_circle(new_x, new_y, PLAYER_SIZE // 2) for obstacle in obstacles):
@@ -341,10 +308,26 @@ while running:
     player2.move(dx_player2, dy_player2)"""
         # Move player 2
         pass
-    dx_player2 = shared_commands["dx"]
-    dy_player2 = shared_commands["dy"]
+    keys = pygame.key.get_pressed()
 
-    player2.move(dx_player2, dy_player2)
+    # Movement for primary player using arrow keys
+    # Example: Update shared_instructions based on primary player actions
+
+    # Movement for secondary player using WASD keys
+    dx, dy = 0, 0
+    if keys[pygame.K_a]:
+        dx = -PLAYER_SPEED
+
+    if keys[pygame.K_d]:
+        dx = PLAYER_SPEED
+
+    if keys[pygame.K_w]:
+        dy = -PLAYER_SPEED
+
+    if keys[pygame.K_s]:
+        dy = PLAYER_SPEED
+
+    player2.move(dx, dy)
 
     # Reset dx, dy in shared_commands after moving
     shared_commands["dx"] = 0
@@ -380,8 +363,8 @@ while running:
             pygame.time.wait(5000)  # Wait for 5 seconds
 
     # # Draw local environment around player 1
-    #local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
-    #pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
+    # local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
+    # pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
 
     # # Draw the local environment window onto the main window
     # window.blit(local_env_window, (WIDTH - local_env_width - 10, HEIGHT - local_env_height - 10))
@@ -400,4 +383,3 @@ while running:
 # Quit Pygame
 pygame.quit()
 sys.exit()
-
