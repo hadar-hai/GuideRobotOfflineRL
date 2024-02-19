@@ -4,6 +4,7 @@ import random
 import sys
 import threading
 
+
 import tkinter as tk
 from tkinter import Tk, Label
 import pygame
@@ -28,7 +29,6 @@ FONT = pygame.font.Font(None, 36)
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2D Map Game")
 
-
 def run_tkinter_gui(shared_instructions):
     def update_instruction():
         instruction = shared_instructions.get("instruction", "Ready")
@@ -41,9 +41,8 @@ def run_tkinter_gui(shared_instructions):
     instruction_label.pack()
     update_instruction()
     root.mainloop()
+shared_commands= {"instruction": "Ready"}
 
-
-shared_commands = {"instruction": "Ready"}
 
 
 # Main_Player class
@@ -62,8 +61,8 @@ class Main_Player:
         new_rect = self.rect.move(dx, dy)
         if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in
                    obstacles) and not any(
-            obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
-                                        self.other_player.rect.centery) for obstacle in obstacles):
+                obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
+                                            self.other_player.rect.centery) for obstacle in obstacles):
             self.rect = new_rect
         else:
             collision_text = FONT.render("Collision!", True, RED)
@@ -87,8 +86,8 @@ class Secondary_Player:
         new_rect = self.rect.move(dx, dy)
         if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in
                    obstacles) and not any(
-            obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
-                                        self.other_player.rect.centery) for obstacle in obstacles):
+                obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
+                                            self.other_player.rect.centery) for obstacle in obstacles):
             self.rect = new_rect
         else:
             collision_text = FONT.render("Collision!", True, RED)
@@ -261,80 +260,55 @@ while running:
 
     # Get the state of all keys
     keys = pygame.key.get_pressed()
-    leash_dist = leash.update()
 
-    if leash_dist <= leash.length:
-        # Move player 1
-        dx_player1, dy_player1 = 0, 0
-        if keys[pygame.K_LEFT]:
-            dx_player1 = -PLAYER_SPEED
-            shared_commands["instruction"] = "Move Left"
-        if keys[pygame.K_RIGHT]:
-            dx_player1 = PLAYER_SPEED
-            shared_commands["instruction"] = "Move Right"
-        if keys[pygame.K_UP]:
-            dy_player1 = -PLAYER_SPEED
-            shared_commands["instruction"] = "Move Up"
-        if keys[pygame.K_DOWN]:
-            dy_player1 = PLAYER_SPEED
-            shared_commands["instruction"] = "Move Down"
-        player1.move(dx_player1, dy_player1)
+    # Initialize movement deltas for both players
+    dx_player1, dy_player1 = 0, 0
+    dx_player2, dy_player2 = 0, 0
 
-    # If the distance exceeds the maximum length, unable player2 movement
-    print("leash dist", leash_dist)
-    if leash_dist > leash.length and leash_dist < leash.length + 5:
-        # angle = math.atan2(player1.rect.centery - player2.rect.centery,
-        #                        player1.rect.centerx - player2.rect.centerx)
-        # dx = int(self.length * math.cos(angle))
-        # dy = int(self.length * math.sin(angle))
-        # pygame.draw.line(window, GREEN, player2.rect.center, player1.rect.center, 5)
-        # pygame.display.update()  # Update display to show the line
-        # new_x = self.player2.rect.x + dx
-        # new_y = self.player2.rect.y + dy
-        # new_rect = pygame.Rect(new_x, new_y, PLAYER_SIZE, PLAYER_SIZE)
-        # if not any(obstacle.collides_with_circle(new_x, new_y, PLAYER_SIZE // 2) for obstacle in obstacles):
-        #     self.player2.rect.center = (new_x, new_y)
-        """
-            dx_player2, dy_player2 = 0, 0
+    # Determine player 1's and player 2's intended movement based on input
+    # Player 1 Movement Input
+    if keys[pygame.K_LEFT]:
+        dx_player1 = -PLAYER_SPEED
+        shared_commands["instruction"] = "Move Left"
+    elif keys[pygame.K_RIGHT]:
+        dx_player1 = PLAYER_SPEED
+        shared_commands["instruction"] = "Move Right"
+    elif keys[pygame.K_UP]:
+        dy_player1 = -PLAYER_SPEED
+        shared_commands["instruction"] = "Move Up"
+    elif keys[pygame.K_DOWN]:
+        dy_player1 = PLAYER_SPEED
+        shared_commands["instruction"] = "Move Down"
+
+    # Player 2 Movement Input
     if keys[pygame.K_a]:
         dx_player2 = -PLAYER_SPEED
-    if keys[pygame.K_d]:
+    elif keys[pygame.K_d]:
         dx_player2 = PLAYER_SPEED
-    if keys[pygame.K_w]:
+    elif keys[pygame.K_w]:
         dy_player2 = -PLAYER_SPEED
-    if keys[pygame.K_x]:
+    elif keys[pygame.K_s]:
         dy_player2 = PLAYER_SPEED
 
-    player2.move(dx_player2, dy_player2)"""
-        # Move player 2
-        pass
-    keys = pygame.key.get_pressed()
+    # Process player 2's movement first to allow player 1 to react to leash tension
+    player2.move(dx_player2, dy_player2)
 
-    # Movement for primary player using arrow keys
-    # Example: Update shared_instructions based on primary player actions
+    # Now update the leash distance after player 2's movement
+    leash_dist = leash.update()
 
-    # Movement for secondary player using WASD keys
-    dx, dy = 0, 0
-    if keys[pygame.K_a]:
-        dx = -PLAYER_SPEED
+    # Then decide on player 1's movement based on the leash's current state
+    if leash_dist >= leash.length and (dx_player1 == -dx_player2 or dy_player1 == -dy_player2):
+        # If the leash is taut and players are moving in opposite directions, player 1 follows player 2
+        player1.move(dx_player2, dy_player2)
+    else:
+        # If the leash is not taut or no direct opposition in movement, proceed with player 1's intended movement
+        player1.move(dx_player1, dy_player1)
 
-    if keys[pygame.K_d]:
-        dx = PLAYER_SPEED
+    # Update leash distance once after all movements are processed
+    leash_dist = leash.update()
 
-    if keys[pygame.K_w]:
-        dy = -PLAYER_SPEED
 
-    if keys[pygame.K_s]:
-        dy = PLAYER_SPEED
 
-    player2.move(dx, dy)
-
-    # Reset dx, dy in shared_commands after moving
-    shared_commands["dx"] = 0
-    shared_commands["dy"] = 0
-
-    # Update leash position
-    leash.update()
 
     # Draw player 1, player 2, and leash
     player1.draw()
@@ -363,8 +337,8 @@ while running:
             pygame.time.wait(5000)  # Wait for 5 seconds
 
     # # Draw local environment around player 1
-    # local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
-    # pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
+    #local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
+    #pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
 
     # # Draw the local environment window onto the main window
     # window.blit(local_env_window, (WIDTH - local_env_width - 10, HEIGHT - local_env_height - 10))
