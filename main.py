@@ -4,7 +4,6 @@ import random
 import sys
 import threading
 
-
 import tkinter as tk
 from tkinter import Tk, Label
 import pygame
@@ -29,6 +28,7 @@ FONT = pygame.font.Font(None, 36)
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2D Map Game")
 
+
 def run_tkinter_gui(shared_instructions):
     def update_instruction():
         instruction = shared_instructions.get("instruction", "Ready")
@@ -41,8 +41,9 @@ def run_tkinter_gui(shared_instructions):
     instruction_label.pack()
     update_instruction()
     root.mainloop()
-shared_commands= {"instruction": "Ready"}
 
+
+shared_commands = {"instruction": "Ready"}
 
 
 # Main_Player class
@@ -50,6 +51,8 @@ class Main_Player:
     def __init__(self, x, y, color=RED):
         self.rect = pygame.Rect(x, y, PLAYER_SIZE, PLAYER_SIZE)
         self.color = color
+        self.collision_flag = False
+        self.reached_goal_flag = False  # Add a flag for reaching the goal
 
     def update_other_player(self, other_player: 'Secondary_Player' = None):
         self.other_player = other_player
@@ -61,10 +64,11 @@ class Main_Player:
         new_rect = self.rect.move(dx, dy)
         if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in
                    obstacles) and not any(
-                obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
-                                            self.other_player.rect.centery) for obstacle in obstacles):
+            obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
+                                        self.other_player.rect.centery) for obstacle in obstacles):
             self.rect = new_rect
         else:
+            self.collision_flag = True
             collision_text = FONT.render("Collision!", True, RED)
             window.blit(collision_text,
                         (WIDTH // 2 - collision_text.get_width() // 2, HEIGHT // 2 - collision_text.get_height() // 2))
@@ -75,6 +79,8 @@ class Secondary_Player:
     def __init__(self, x, y, color=BLUE):
         self.rect = pygame.Rect(x, y, PLAYER_SIZE, PLAYER_SIZE)
         self.color = color
+        self.collision_flag = False
+        self.reached_goal_flag = False
 
     def update_other_player(self, other_player: 'Secondary_Player' = None):
         self.other_player = other_player
@@ -86,10 +92,11 @@ class Secondary_Player:
         new_rect = self.rect.move(dx, dy)
         if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in
                    obstacles) and not any(
-                obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
-                                            self.other_player.rect.centery) for obstacle in obstacles):
+            obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
+                                        self.other_player.rect.centery) for obstacle in obstacles):
             self.rect = new_rect
         else:
+            self.collision_flag = True
             collision_text = FONT.render("Collision!", True, RED)
             window.blit(collision_text,
                         (WIDTH // 2 - collision_text.get_width() // 2, HEIGHT // 2 - collision_text.get_height() // 2))
@@ -201,6 +208,32 @@ class Obstacle:
         return False
 
 
+# Goal class
+class Goal:
+    def __init__(self, x, y, size=20, color=GREEN):
+        self.rect = pygame.Rect(x, y, size, size)
+        self.color = color
+
+    def draw(self):
+        pygame.draw.rect(window, self.color, self.rect)
+
+
+class GameData:
+    def __init__(self):
+        # Initialize an empty list to hold the game state vector
+        self.state_vector = []
+        # Define the initial state for the first timestep
+        self.initial_state = [0, 0, 4, 0, 0, 0, 0, 4, 0, 0]  # x, y, direction, crashed, reached_goal for both players
+
+    def update_state_vector(self, player1_state, player2_state):
+        # Concatenate player states and append to the state vector
+        self.state_vector.append([player1_state, player2_state])
+
+    def get_state_vector(self):
+        # Return the complete state vector
+        return self.state_vector
+
+
 # Create players, leash, and obstacles
 player1 = Main_Player(50, 50)
 player2 = Secondary_Player(50, 50, color=BLUE)  # Second player attached to the first
@@ -210,7 +243,7 @@ leash = Leash(player1, player2, LEASH_MAX_LENGTH)
 
 # Generate random obstacles
 obstacles = []
-NUM_OBSTACLES = 30
+NUM_OBSTACLES = 20
 for _ in range(NUM_OBSTACLES):
     obstacle_width = random.randint(30, 100)
     obstacle_height = random.randint(30, 100)
@@ -223,17 +256,8 @@ local_env_width = LEASH_MAX_LENGTH * 2 + 50
 local_env_height = LEASH_MAX_LENGTH * 2 + 50
 local_env_window = pygame.Surface((local_env_width, local_env_height))
 
-
-# Goal class
-class Goal:
-    def __init__(self, x, y, size=20, color=GREEN):
-        self.rect = pygame.Rect(x, y, size, size)
-        self.color = color
-
-    def draw(self):
-        pygame.draw.rect(window, self.color, self.rect)
-
-
+# Initialize the game data structure
+game_data = GameData()
 # Create the goal
 goal = Goal(random.randint(0, WIDTH - 20), random.randint(0, HEIGHT - 20))
 
@@ -264,31 +288,40 @@ while running:
     # Initialize movement deltas for both players
     dx_player1, dy_player1 = 0, 0
     dx_player2, dy_player2 = 0, 0
+    direction_player1 = 4  # Stationary
+    direction_player2 = 4  # Stationary
 
-    # Determine player 1's and player 2's intended movement based on input
     # Player 1 Movement Input
     if keys[pygame.K_LEFT]:
         dx_player1 = -PLAYER_SPEED
+        direction_player1 = 0  # Left
         shared_commands["instruction"] = "Move Left"
     elif keys[pygame.K_RIGHT]:
         dx_player1 = PLAYER_SPEED
+        direction_player1 = 1  # Right
         shared_commands["instruction"] = "Move Right"
     elif keys[pygame.K_UP]:
         dy_player1 = -PLAYER_SPEED
+        direction_player1 = 2  # Up
         shared_commands["instruction"] = "Move Up"
     elif keys[pygame.K_DOWN]:
         dy_player1 = PLAYER_SPEED
+        direction_player1 = 3  # Down
         shared_commands["instruction"] = "Move Down"
 
     # Player 2 Movement Input
     if keys[pygame.K_a]:
         dx_player2 = -PLAYER_SPEED
+        direction_player2 = 0  # Left
     elif keys[pygame.K_d]:
         dx_player2 = PLAYER_SPEED
+        direction_player2 = 1  # Right
     elif keys[pygame.K_w]:
         dy_player2 = -PLAYER_SPEED
+        direction_player2 = 2  # Up
     elif keys[pygame.K_s]:
         dy_player2 = PLAYER_SPEED
+        direction_player2 = 3  # Down
 
     # Process player 2's movement first to allow player 1 to react to leash tension
     player2.move(dx_player2, dy_player2)
@@ -306,9 +339,6 @@ while running:
 
     # Update leash distance once after all movements are processed
     leash_dist = leash.update()
-
-
-
 
     # Draw player 1, player 2, and leash
     player1.draw()
@@ -331,14 +361,40 @@ while running:
             # End the game
             goal_reached = True
             print("You reached the goal!")
+            player1.reached_goal_flag = True
+            player2.reached_goal_flag = True
             goal_text = FONT.render("You reached the goal!", True, GREEN)
             window.blit(goal_text, (WIDTH // 2 - goal_text.get_width() // 2, HEIGHT // 2 - goal_text.get_height() // 2))
             pygame.display.update()
             pygame.time.wait(5000)  # Wait for 5 seconds
+    # Collision detection for player1 and player2
+    player1_crashed = player1.collision_flag
+    player2_crashed = player2.collision_flag
+
+    # Update crash flags based on collision detection
+    player1_crashed_b = 1 if player1_crashed else 0
+    player2_crashed_b = 1 if player2_crashed else 0
+
+    # Goal achievement check for player1
+    player1_reached_goal = 1 if player1.reached_goal_flag else 0
+    player2_reached_goal = 1 if player2.reached_goal_flag else 0
+
+    # Example of updating game data for each player
+    player1_state = [player1.rect.x, player1.rect.y, direction_player1, player1_crashed_b,
+                     player1_reached_goal]
+    player2_state = [player2.rect.x, player2.rect.y, direction_player2, player2_crashed_b,
+                     player2_reached_goal]
+
+    # Increment timestep after each loop iteration
+    # Update the game state vector
+    game_data.update_state_vector(player1_state, player2_state)
+
+    # Access the game state vector
+    print("Last Game State:", game_data.get_state_vector()[-1])
 
     # # Draw local environment around player 1
-    #local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
-    #pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
+    # local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
+    # pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
 
     # # Draw the local environment window onto the main window
     # window.blit(local_env_window, (WIDTH - local_env_width - 10, HEIGHT - local_env_height - 10))
@@ -357,3 +413,4 @@ while running:
 # Quit Pygame
 pygame.quit()
 sys.exit()
+
