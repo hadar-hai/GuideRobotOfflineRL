@@ -222,6 +222,29 @@ class Goal:
     def draw(self):
         pygame.draw.rect(window, self.color, self.rect)
 
+class ScoreManager:
+    def __init__(self):
+        self.score = 100  # Initial score
+
+    def update_score(self, player1, player2):
+        if player1.collision_flag:
+            self.score -= 40
+            player1.collision_flag = False  # Reset flag after handling
+        if player2.collision_flag:
+            self.score -= 10
+            player2.collision_flag = False  # Reset flag after handling
+        if player1.reached_goal_flag or player2.reached_goal_flag:
+            self.score += 100
+            player1.reached_goal_flag = False  # Consider resetting these if you use them outside this logic
+            player2.reached_goal_flag = False
+        #self.score -= 1  # Subtract fixed reward for each time-step
+
+    def get_score(self):
+        return self.score
+
+    def display_score(self, window, font):
+        score_text = font.render(f"Score: {self.get_score()}", True, BLACK)
+        window.blit(score_text, (10, 10))  # Position the score at the top-left corner
 
 class GameData:
     def __init__(self, directory="C:/Users/anush/Downloads/gamedata"):
@@ -302,7 +325,7 @@ local_env_window = pygame.Surface((local_env_width, local_env_height))
 
 # Initialize the game data structure
 game_data = GameData()
-
+score_manager = ScoreManager()
 
 # Main game loop
 running = True
@@ -436,7 +459,9 @@ while running:
     # Increment timestep after each loop iteration
     # Update the game state vector
     game_data.update_state_vector(player1_state, player2_state)
-
+    # Update the score based on current game state
+    score_manager.update_score(player1, player2)
+    score_manager.display_score(window, FONT)
 
     # # Draw local environment around player 1
     #local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
