@@ -4,6 +4,7 @@ import random
 import sys
 import threading
 
+
 import tkinter as tk
 from tkinter import Tk, Label
 import pygame
@@ -28,7 +29,6 @@ FONT = pygame.font.Font(None, 36)
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2D Map Game")
 
-
 def run_tkinter_gui(shared_instructions):
     def update_instruction():
         instruction = shared_instructions.get("instruction", "Ready")
@@ -41,9 +41,8 @@ def run_tkinter_gui(shared_instructions):
     instruction_label.pack()
     update_instruction()
     root.mainloop()
+shared_commands= {"instruction": "Ready"}
 
-
-shared_commands = {"instruction": "Ready"}
 
 
 # Main_Player class
@@ -54,6 +53,7 @@ class Main_Player:
         self.collision_flag = False
         self.reached_goal_flag = False  # Add a flag for reaching the goal
 
+
     def update_other_player(self, other_player: 'Secondary_Player' = None):
         self.other_player = other_player
 
@@ -64,14 +64,15 @@ class Main_Player:
         new_rect = self.rect.move(dx, dy)
         if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in
                    obstacles) and not any(
-            obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
-                                        self.other_player.rect.centery) for obstacle in obstacles):
+                obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
+                                            self.other_player.rect.centery) for obstacle in obstacles):
             self.rect = new_rect
         else:
             self.collision_flag = True
             collision_text = FONT.render("Collision!", True, RED)
             window.blit(collision_text,
                         (WIDTH // 2 - collision_text.get_width() // 2, HEIGHT // 2 - collision_text.get_height() // 2))
+
 
 
 # Secondary_Player class
@@ -82,6 +83,7 @@ class Secondary_Player:
         self.collision_flag = False
         self.reached_goal_flag = False
 
+
     def update_other_player(self, other_player: 'Secondary_Player' = None):
         self.other_player = other_player
 
@@ -92,14 +94,16 @@ class Secondary_Player:
         new_rect = self.rect.move(dx, dy)
         if not any(obstacle.collides_with_circle(new_rect.centerx, new_rect.centery, PLAYER_SIZE // 2) for obstacle in
                    obstacles) and not any(
-            obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
-                                        self.other_player.rect.centery) for obstacle in obstacles):
+                obstacle.collides_with_line(new_rect.centerx, new_rect.centery, self.other_player.rect.centerx,
+                                            self.other_player.rect.centery) for obstacle in obstacles):
             self.rect = new_rect
         else:
             self.collision_flag = True
             collision_text = FONT.render("Collision!", True, RED)
             window.blit(collision_text,
                         (WIDTH // 2 - collision_text.get_width() // 2, HEIGHT // 2 - collision_text.get_height() // 2))
+
+
 
 
 # Leash class
@@ -207,7 +211,6 @@ class Obstacle:
 
         return False
 
-
 # Goal class
 class Goal:
     def __init__(self, x, y, size=20, color=GREEN):
@@ -216,7 +219,6 @@ class Goal:
 
     def draw(self):
         pygame.draw.rect(window, self.color, self.rect)
-
 
 class GameData:
     def __init__(self):
@@ -232,15 +234,19 @@ class GameData:
     def get_state_vector(self):
         # Return the complete state vector
         return self.state_vector
+def is_position_clear(x, y, size, obstacles):
+    temp_rect = pygame.Rect(x, y, size, size)
+    for obstacle in obstacles:
+        if temp_rect.colliderect(obstacle.rect):
+            return False
+    return True
 
-
-# Create players, leash, and obstacles
-player1 = Main_Player(50, 50)
-player2 = Secondary_Player(50, 50, color=BLUE)  # Second player attached to the first
-player1.update_other_player(player2)
-player2.update_other_player(player1)
-leash = Leash(player1, player2, LEASH_MAX_LENGTH)
-
+def place_entity_away_from_obstacles(entity_size, obstacles):
+    while True:
+        x = random.randint(0, WIDTH - entity_size)
+        y = random.randint(0, HEIGHT - entity_size)
+        if is_position_clear(x, y, entity_size, obstacles):
+            return x, y
 # Generate random obstacles
 obstacles = []
 NUM_OBSTACLES = 20
@@ -250,20 +256,37 @@ for _ in range(NUM_OBSTACLES):
     obstacle_x = random.randint(0, WIDTH - obstacle_width)
     obstacle_y = random.randint(0, HEIGHT - obstacle_height)
     obstacles.append(Obstacle(obstacle_x, obstacle_y, obstacle_width, obstacle_height))
+for obstacle in obstacles:
+        obstacle.draw()
+robot_x, robot_y = place_entity_away_from_obstacles(PLAYER_SIZE, obstacles)
+
+goal_x, goal_y = place_entity_away_from_obstacles(20, obstacles)  # Assuming the goal size is 20
+
+player1 = Main_Player(robot_x, robot_y)
+player2 = Secondary_Player(robot_x,robot_y, color=BLUE)
+goal = Goal(goal_x, goal_y, size=20, color=GREEN)
+player1.update_other_player(player2)
+player2.update_other_player(player1)
+leash = Leash(player1, player2, LEASH_MAX_LENGTH)
+
+
 
 # Create the local environment window
 local_env_width = LEASH_MAX_LENGTH * 2 + 50
 local_env_height = LEASH_MAX_LENGTH * 2 + 50
 local_env_window = pygame.Surface((local_env_width, local_env_height))
 
+
+
 # Initialize the game data structure
 game_data = GameData()
-# Create the goal
-goal = Goal(random.randint(0, WIDTH - 20), random.randint(0, HEIGHT - 20))
+
 
 # Main game loop
 running = True
 goal_reached = False
+
+
 # Start the Tkinter thread
 # Start Tkinter in a separate thread
 tk_thread = threading.Thread(target=run_tkinter_gui, args=(shared_commands,))
@@ -340,6 +363,9 @@ while running:
     # Update leash distance once after all movements are processed
     leash_dist = leash.update()
 
+
+
+
     # Draw player 1, player 2, and leash
     player1.draw()
     player2.draw()
@@ -361,8 +387,8 @@ while running:
             # End the game
             goal_reached = True
             print("You reached the goal!")
-            player1.reached_goal_flag = True
-            player2.reached_goal_flag = True
+            player1.reached_goal_flag= True
+            player2.reached_goal_flag= True
             goal_text = FONT.render("You reached the goal!", True, GREEN)
             window.blit(goal_text, (WIDTH // 2 - goal_text.get_width() // 2, HEIGHT // 2 - goal_text.get_height() // 2))
             pygame.display.update()
@@ -380,10 +406,10 @@ while running:
     player2_reached_goal = 1 if player2.reached_goal_flag else 0
 
     # Example of updating game data for each player
-    player1_state = [player1.rect.x, player1.rect.y, direction_player1, player1_crashed_b,
-                     player1_reached_goal]
-    player2_state = [player2.rect.x, player2.rect.y, direction_player2, player2_crashed_b,
-                     player2_reached_goal]
+    player1_state =[player1.rect.x, player1.rect.y, direction_player1, player1_crashed_b,
+                                  player1_reached_goal]
+    player2_state =[ player2.rect.x, player2.rect.y, direction_player2, player2_crashed_b,
+                                  player2_reached_goal]
 
     # Increment timestep after each loop iteration
     # Update the game state vector
@@ -392,9 +418,10 @@ while running:
     # Access the game state vector
     print("Last Game State:", game_data.get_state_vector()[-1])
 
+
     # # Draw local environment around player 1
-    # local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
-    # pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
+    #local_env_window.blit(window, (0, 0), local_env_rect)  # Blit the portion of the main window onto the local environment window
+    #pygame.draw.rect(local_env_window, GREEN, local_env_window.get_rect(), 2)  # Draw a border around the local environment window
 
     # # Draw the local environment window onto the main window
     # window.blit(local_env_window, (WIDTH - local_env_width - 10, HEIGHT - local_env_height - 10))
@@ -413,4 +440,3 @@ while running:
 # Quit Pygame
 pygame.quit()
 sys.exit()
-
