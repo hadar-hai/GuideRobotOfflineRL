@@ -14,6 +14,17 @@ In this scenario, the guide robot possesses complete knowledge of the map layout
 - **Human-like Behavior**: The visually impaired individual may act irrationally at times, influencing the situation unpredictably.
 - **Dynamic Leash Interaction**: If the leash reaches its maximum length and the individual moves in the opposite direction, they can pull the agent, presenting unique challenges for navigation.
 
+## Data Collection
+
+Data collection in this project involves letting to human players to play the interactive game a recording various parameters such as:
+- Guide robot's positions and actions
+- Visually impaired individual's positions and actions
+- Obstacles positions
+- Goal positions
+
+A data collection human-human interaction game (a failed one):
+![data_collection_2_players](https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/dd81b088-642a-4877-82ed-e9dc74f99511)
+
 ## Repository Contents
 
 - `README.md`: This file provides an overview of the project, scenario description, and unique challenges using offline RL.
