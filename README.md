@@ -33,6 +33,11 @@ A data collection human-human interaction game (a failed one):
 - [Gil Gur-Arieh](https://github.com/gilgurarieh)
 - [Hadar Hai](https://github.com/hadar-hai)
 
+## Project Supervisors
+
+- [Prop. Sarah Keren](https://sarahk.cs.technion.ac.il/)
+- [Or Rivlin](https://github.com/orrivlin)
+
 ## Repository Contents
 
 - `README.md`: This file provides an overview of the project, scenario description, and unique challenges using offline RL.
@@ -54,3 +59,5 @@ Contributions to this project are welcome. If you have any suggestions, improvem
 
 ---
 *Note: This project is a simulation and does not involve real-world interactions with visually impaired individuals. It is meant for educational and research purposes only.*
+*The project was created as a part of course CS236006 of Computer Science faculty, Technion.*
+
