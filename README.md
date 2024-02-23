@@ -24,7 +24,7 @@ Data collection in this project involves letting to human players to play the in
 
 A data collection human-human interaction game (a failed one):
 
-![data_collection_2_players](https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/d097fe0c-f899-40dd-8ff4-17ee6caf7300)
+<img src="https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/d097fe0c-f899-40dd-8ff4-17ee6caf7300" width="400" alt="data_collection_2_players">
 
 ## Repository Contents
 
