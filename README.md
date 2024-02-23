@@ -27,6 +27,12 @@ A data collection human-human interaction game (a failed one):
 
 <img src="https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/d097fe0c-f899-40dd-8ff4-17ee6caf7300" width="400" alt="data_collection_2_players">
 
+## Partners
+
+- [Anushka Deshpande](https://github.com/Anna4142)
+- [Gil Gur-Arieh](https://github.com/gilgurarieh)
+- [Hadar Hai](https://github.com/hadar-hai)
+
 ## Repository Contents
 
 - `README.md`: This file provides an overview of the project, scenario description, and unique challenges using offline RL.
