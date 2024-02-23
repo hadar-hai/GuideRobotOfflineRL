@@ -17,7 +17,7 @@ In this scenario, the guide robot possesses complete knowledge of the map layout
 
 ## Data Collection
 
-Data collection in this project involves letting to human players to play the interactive game a recording various parameters such as:
+Data collection in this project involves letting human players to play the interactive game a recording various parameters such as:
 - Guide robot's positions and actions
 - Visually impaired individual's positions and actions
 - Obstacles positions
