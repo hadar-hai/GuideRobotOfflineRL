@@ -1,5 +1,7 @@
 # GuideRobotOfflineRL - Guide Robot for Visually Impaired Individuals using Offline Reinforcement Learning
 
+## ! Project under development !
+
 ## Overview
 
 This project illustrates a scenario in which an agent, referred to as the guide robot, is tasked with guiding a visually impaired individual through a two-dimensional obstacle-filled map towards a goal. The guide robot is connected to the individual by a leash, and the goal is to safely navigate through obstacles while ensuring the individual's safety.
@@ -12,7 +14,6 @@ In this scenario, the guide robot possesses complete knowledge of the map layout
 
 - **Limited Perception**: The visually impaired individual can only perceive a directional signal aligned with the leash's direction, limiting their understanding of the environment.
 - **Human-like Behavior**: The visually impaired individual may act irrationally at times, influencing the situation unpredictably.
-- **Dynamic Leash Interaction**: If the leash reaches its maximum length and the individual moves in the opposite direction, they can pull the agent, presenting unique challenges for navigation.
 
 ## Data Collection
 
