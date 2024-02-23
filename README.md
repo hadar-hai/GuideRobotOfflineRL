@@ -23,6 +23,7 @@ Data collection in this project involves letting to human players to play the in
 - Goal positions
 
 A data collection human-human interaction game (a failed one):
+
 ![data_collection_2_players](https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/dd81b088-642a-4877-82ed-e9dc74f99511)
 
 ## Repository Contents
