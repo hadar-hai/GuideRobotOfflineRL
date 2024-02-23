@@ -16,9 +16,10 @@ In this scenario, the guide robot possesses complete knowledge of the map layout
 
 ## Repository Contents
 
-- `README.md`: This file provides an overview of the project, scenario description, and unique challenges.
-- `example_2d.png`: Image depicting the scenario with the agent and visually impaired individual on a two-dimensional map.
-- Additional project files and code may be included as development progresses.
+- `README.md`: This file provides an overview of the project, scenario description, and unique challenges using offline RL.
+- main.py
+- Game.py
+- continue!
 
 ## Usage
 
@@ -30,7 +31,7 @@ Contributions to this project are welcome. If you have any suggestions, improvem
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and distribute the code for any purpose. Please see the `LICENSE` file for more details.
+
 
 ---
 *Note: This project is a simulation and does not involve real-world interactions with visually impaired individuals. It is meant for educational and research purposes only.*
