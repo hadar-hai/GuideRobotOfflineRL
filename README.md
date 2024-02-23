@@ -59,5 +59,6 @@ Contributions to this project are welcome. If you have any suggestions, improvem
 
 ---
 *Note: This project is a simulation and does not involve real-world interactions with visually impaired individuals. It is meant for educational and research purposes only.*
+
 *The project was created as a part of course CS236006 of Computer Science faculty, Technion.*
 
