@@ -1,4 +1,4 @@
-# GuideRobotOfflineRL - Guide Robot for Visually Impaired Individuals using Offline Reinforcement Learning
+# GuideRobotOfflineRL - Offline Reinforcement Learning-Based Human Guide Robot for Visually Impaired Navigation
 
 ## ! Project under development !
 
