@@ -148,7 +148,7 @@ class Game:
         goal_reached = False
         # Evaluate distance to goal
         distance_to_goal = math.sqrt(
-            (self.player1.rect.centerx - self.goal.rect.centerx) ** 2 + (self.player1.rect.centery - self.goal.rect.centery) ** 2)
+            (self.player2.rect.centerx - self.goal.rect.centerx) ** 2 + (self.player2.rect.centery - self.goal.rect.centery) ** 2) # player 2 is the human player, distance to goal is calculated based on the human player's position
 
         if distance_to_goal <= GOAL_REACH_DISTANCE:
             # End the game
