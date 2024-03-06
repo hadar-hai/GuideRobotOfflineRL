@@ -275,13 +275,12 @@ class Game:
     def run_tkinter_gui(self, shared_instructions):
         # Why is the nested function required?
         def update_instruction():
-            dx_player1 = self.dx_player1
-            dy_player1 = self.dy_player1
-            dx_player2 = self.dx_player2
-            dy_player2 = self.dy_player2
-            instruction = self.shared_commands.get("instruction", "Ready")
-            if (instruction == "Move Right" or instruction == "Move Left" or instruction == "Move Up" or
-                    instruction == "Move Down") and (self.leash_dist >= self.leash.length and (dx_player1 == -dx_player2 or dy_player1 == -dy_player2)):
+            # dx_player1 = self.dx_player1
+            # dy_player1 = self.dy_player1
+            # dx_player2 = self.dx_player2
+            # dy_player2 = self.dy_player2
+            # instruction = self.shared_commands.get("instruction", "Ready")
+            if (self.leash_dist >= self.leash.length - 1): # and (dx_player1 == -dx_player2 or dy_player1 == -dy_player2)):
                 # # Calculate leash direction angle
                 leash_direction_angle = math.atan2(self.player1.rect.centery - self.player2.rect.centery,
                                                    self.player1.rect.centerx - self.player2.rect.centerx)
