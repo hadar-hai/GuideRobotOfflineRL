@@ -1,4 +1,6 @@
-# GuideRobotOfflineRL - Guide Robot for Visually Impaired Individuals using Offline Reinforcement Learning
+# GuideRobotOfflineRL - Offline Reinforcement Learning-Based Human Guide Robot for Visually Impaired Navigation
+
+## ! Project under development !
 
 ## Overview
 
@@ -12,11 +14,10 @@ In this scenario, the guide robot possesses complete knowledge of the map layout
 
 - **Limited Perception**: The visually impaired individual can only perceive a directional signal aligned with the leash's direction, limiting their understanding of the environment.
 - **Human-like Behavior**: The visually impaired individual may act irrationally at times, influencing the situation unpredictably.
-- **Dynamic Leash Interaction**: If the leash reaches its maximum length and the individual moves in the opposite direction, they can pull the agent, presenting unique challenges for navigation.
 
 ## Data Collection
 
-Data collection in this project involves letting to human players to play the interactive game a recording various parameters such as:
+Data collection in this project involves letting human players to play the interactive game a recording various parameters such as:
 - Guide robot's positions and actions
 - Visually impaired individual's positions and actions
 - Obstacles positions
@@ -24,7 +25,20 @@ Data collection in this project involves letting to human players to play the in
 
 A data collection human-human interaction game (a failed one):
 
+<p align="center">
 <img src="https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/d097fe0c-f899-40dd-8ff4-17ee6caf7300" width="400" alt="data_collection_2_players">
+</p>
+
+## Partners
+
+- [Anushka Deshpande](https://github.com/Anna4142)
+- [Gil Gur-Arieh](https://github.com/gilgurarieh)
+- [Hadar Hai](https://github.com/hadar-hai)
+
+## Project Supervisors
+
+- [Prop. Sarah Keren](https://sarahk.cs.technion.ac.il/)
+- [Or Rivlin](https://github.com/orrivlin)
 
 ## Repository Contents
 
@@ -47,3 +61,6 @@ Contributions to this project are welcome. If you have any suggestions, improvem
 
 ---
 *Note: This project is a simulation and does not involve real-world interactions with visually impaired individuals. It is meant for educational and research purposes only.*
+
+*The project was created as a part of course CS236006 of Computer Science faculty, Technion.*
+
