@@ -1,18 +1,21 @@
 import csv
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+import pygame
 
-map_data_file = './data/2024_02_21/dataset1/map_data_01.csv'
-game_data_file = './data/2024_02_21/dataset1/game_data_01.csv'
+map_data_file = 'map_data_09.csv'
+game_data_file = 'game_data_09.csv'
+
+WIDTH = 800
+HEIGHT = 600
 
 # Function to extract obstacle coordinates from the CSV row
 def extract_obstacle_coords(row):
     obstacles = []
-    for i in range(2, len(row)):
+    for i in range(2, len(row), 4):  # Iterate over the obstacle columns with step 4
         if row[i] != '':
-            # Remove square brackets and split the string to get individual coordinates
-            coords = row[i].strip('[]').split(',')
-            obstacle = [int(coord) for coord in coords]
-            obstacles.append(obstacle)
+            obstacle_rect = pygame.Rect(int(row[i]), HEIGHT - int(row[i+1]) - int(row[i+3]), int(row[i+2]), int(row[i+3]))
+            obstacles.append(obstacle_rect)
     return obstacles
 
 # Read map data from CSV file and extract goal and obstacles
@@ -20,16 +23,15 @@ with open(map_data_file, 'r') as file:
     reader = csv.reader(file)
     next(reader)  # Skip header
     for row in reader:
-        goal_x, goal_y = int(row[0]), int(row[1])
+        goal_x, goal_y = int(row[0]), HEIGHT - int(row[1])
         obstacles = extract_obstacle_coords(row)
 
 # Plot the goal
-plt.scatter(goal_x, goal_y, color='green', label='Goal')
+plt.scatter(goal_x, HEIGHT - goal_y, color='green', label='Goal')
 
 # Plot the obstacles
 for obstacle in obstacles:
-    plt.rectangle = plt.Rectangle((obstacle[0], obstacle[1]), obstacle[2], obstacle[3], color='black')
-    plt.gca().add_patch(plt.rectangle)
+    plt.gca().add_patch(Rectangle((obstacle.left, HEIGHT - obstacle.top - obstacle.height), obstacle.width, obstacle.height, color='black'))
 
 player1_x = []
 player1_y = []
@@ -47,18 +49,18 @@ with open(game_data_file, 'r') as file:
         player2_y.append(int(row[6]))
 
 # Plot player routes
-plt.plot(player1_x, player1_y, label='Player 1 - Robot', color='red') 
+plt.plot(player1_x, player1_y, label='Player 1 - Robot', color='red')
 plt.plot(player2_x, player2_y, label='Player 2 - Human', color='blue')
 
-
 # Set plot limits and labels
-plt.xlim(0, 800)
-plt.ylim(0, 600)
+plt.xlim(0, WIDTH)
+plt.ylim(0, HEIGHT)
 plt.xlabel('X-coordinate')
 plt.ylabel('Y-coordinate')
 plt.title('Map with Obstacles, Goal, and Player Routes')
 plt.legend()
 
 # Show plot
+plt.gca().invert_yaxis()  # Invert y-axis to match the new orientation
 plt.grid(True)
 plt.show()

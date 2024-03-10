@@ -4,7 +4,9 @@ import os
 import datetime
 
 class MapData:
-    def __init__(self, obstacles, goal_x, goal_y, directory=os.getcwd()):
+    def __init__(self, obstacles, goal_x, goal_y, directory=None):
+        if directory is None:
+            directory = os.getcwd()
         self.directory = directory
         self.filename = self.generate_filename()
         self.filepath = os.path.join(self.directory, self.filename)
@@ -21,13 +23,13 @@ class MapData:
             writer = csv.writer(file)
             headers = ['goal_x', 'goal_y']
             for obstacle_id in range(len(obstacles)):
-                headers.append(f"obs_{obstacle_id}_x")
-                headers.append(f"obs_{obstacle_id}_y")
-                headers.append(f"obs_{obstacle_id}_height")
-                headers.append(f"obs_{obstacle_id}_width")
+                headers.extend([
+                    f"obs_{obstacle_id}_x",
+                    f"obs_{obstacle_id}_y",
+                    f"obs_{obstacle_id}_width",
+                    f"obs_{obstacle_id}_height"
+                ])
             writer.writerow(headers)
-
-        # Write map data
 
     def generate_filename(self):
         # Count the number of existing files to determine the next file name
@@ -39,8 +41,8 @@ class MapData:
     def update_map_data(self):
         map_data = [self.goal_x, self.goal_y]
         for obstacle in self.obstacles:
-            obstacle_data = [obstacle.x, obstacle.y, obstacle.height, obstacle.width]
-            map_data.append(obstacle_data)
+            obstacle_data = [obstacle.x, obstacle.y, obstacle.width, obstacle.height]
+            map_data.extend(obstacle_data)
         # Append the parameters
         with open(self.filepath, 'a', newline='') as file:
             writer = csv.writer(file)
@@ -48,7 +50,6 @@ class MapData:
 
     def get_filepath(self):
         return self.filepath
-
 
 class GameData:
     def __init__(self, directory=os.getcwd()):
