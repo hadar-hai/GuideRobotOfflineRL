@@ -1,8 +1,8 @@
 import csv
 import matplotlib.pyplot as plt
 
-map_data_file = 'map_data_01.csv'
-game_data_file = 'game_data_01.csv'
+map_data_file = './data/2024_02_21/dataset1/map_data_01.csv'
+game_data_file = './data/2024_02_21/dataset1/game_data_01.csv'
 
 # Function to extract obstacle coordinates from the CSV row
 def extract_obstacle_coords(row):

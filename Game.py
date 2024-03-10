@@ -123,9 +123,9 @@ class Game:
             player2_reached_goal = 1 if self.player2.reached_goal_flag else 0
 
             # Example of updating game data for each player
-            player1_state = [self.player1.rect.x, self.player1.rect.y, direction_player1, player1_crashed_b,
+            player1_state = [self.player1.rect.centerx, self.player1.rect.centery, direction_player1, player1_crashed_b,
                              player1_reached_goal]
-            player2_state = [self.player2.rect.x, self.player2.rect.y, direction_player2, player2_crashed_b,
+            player2_state = [self.player2.rect.centerx, self.player2.rect.centery, direction_player2, player2_crashed_b,
                              player2_reached_goal]
 
             # Increment timestep after each loop iteration
