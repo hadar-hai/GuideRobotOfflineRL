@@ -159,8 +159,12 @@ class Game:
 
             # Increment timestep after each loop iteration
             # Update the game state vector
-            self.game_data.update_state_vector(player1_state, player2_state)
 
+            player1_score = self.score_manager.player1_score
+            player2_score = self.score_manager.player2_score
+
+            # Call update_state_vector with scores
+            self.game_data.update_state_vector(player1_state, player2_state, player1_score, player2_score)
             # Update the score based on current game state
             self.score_manager.update_score(self.player1, self.player2)
             self.score_manager.display_score(self.window, self.font)
