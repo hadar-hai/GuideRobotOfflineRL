@@ -15,7 +15,12 @@ from DataStorage import *
 
 class Game:
 
-    def __init__(self):
+    def __init__(self, player1_agent = None, player2_agent = None):
+        # set agents
+        # NOTE: if at least one of the agents it None, Game will assume both players are human and this is data collection.
+
+        self.player1_agent = player1_agent  # robot actions. None = human player
+        self.player2_agent = player2_agent # fake-human action. None = human player
 
         # initialize pygame
         pygame.init()
@@ -54,6 +59,15 @@ class Game:
         self.game_data = GameData()
         self.score_manager = ScoreManager()
 
+        # Set obstacles and goals to agents (if there are agents)
+        if self.player1_agent:
+            self.player1_agent.obstacles = self.obstacles
+            self.player1_agent.goal = self.goal
+
+        if self.player2_agent:
+            self.player2_agent.obstacles = self.obstacles
+            self.player2_agent.goal = self.goal
+
         # Start the Tkinter thread
         # Start Tkinter in a separate thread
         self.shared_commands = {"instruction": "Ready"}
@@ -78,10 +92,24 @@ class Game:
             self.window.fill(WHITE)
             for obstacle in self.obstacles:
                 obstacle.draw(self.window)
-            print(f"Player 1 position x = {self.player1.rect.centerx}, Player 1 position y = {self.player1.rect.centery}")
+
+            # Set state
+            player1_x = self.player1.rect.centerx
+            player1_y = self.player1.rect.centery
+            player2_x = self.player2.rect.centerx
+            player2_y = self.player2.rect.centery
+            self.current_state = [player1_x, player1_y, player2_x, player2_y]
 
             # Get player input
-            dx1, dy1, direction_player1, dx2, dy2, direction_player2 = self.get_player_input()
+            if not (self.player1_agent and self.player2_agent):
+                # If one of the agents is not defined - assume human input (data collections)
+                dx1, dy1, direction_player1, dx2, dy2, direction_player2 = self.get_player_input()
+
+            else:
+                # Both agents are defined - choose action according to agent policy
+                dx1, dy1, direction_player1 = self.player1_agent.get_state_set_action(self.current_state)
+                dx2, dy2, direction_player2 = self.player2_agent.get_state_set_action(self.current_state)
+
             self.dx_player1 = dx1
             self.dy_player1 = dy1
             self.dx_player2 = dx2
@@ -144,7 +172,6 @@ class Game:
             pygame.time.Clock().tick(30)
 
         return goal_reached
-
     def reached_goal(self):
         goal_reached = False
         # Evaluate distance to goal
