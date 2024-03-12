@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import pygame
 
-map_data_file = 'map_data_09.csv'
-game_data_file = 'game_data_09.csv'
+map_data_file = 'map_data_00.csv'
+game_data_file = 'game_data_00.csv'
 
 WIDTH = 800
 HEIGHT = 600

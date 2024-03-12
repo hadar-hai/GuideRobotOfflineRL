@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Game class
 
 import random
@@ -320,7 +319,6 @@ class Game:
         instruction_label = tk.Label(root, text="Ready", font=("Helvetica", 24, "bold"))
         instruction_label.pack()
         update_instruction()
-=======
 # Game class
 
 import random
@@ -670,5 +668,4 @@ class Game:
         instruction_label = tk.Label(root, text="Ready", font=("Helvetica", 24, "bold"))
         instruction_label.pack()
         update_instruction()
->>>>>>> 9c5a7e1a3028d0cae5c1cdabe9c6640172f3d294
         root.mainloop()
