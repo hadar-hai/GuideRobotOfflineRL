@@ -78,7 +78,6 @@ class Game:
             self.window.fill(WHITE)
             for obstacle in self.obstacles:
                 obstacle.draw(self.window)
-            print(f"Player 1 position x = {self.player1.rect.centerx}, Player 1 position y = {self.player1.rect.centery}")
 
             # Get player input
             dx1, dy1, direction_player1, dx2, dy2, direction_player2 = self.get_player_input()
