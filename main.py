@@ -3,7 +3,7 @@ from Game import Game
 from Agents import *
 
 # Set agents.
-player1_agent = GoalFollow()
+player1_agent = None
 player2_agent = EpsilonLeashFollow()
 
 # Main game loop
