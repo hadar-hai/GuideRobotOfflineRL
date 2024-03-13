@@ -109,24 +109,39 @@ class Goal:
 
 class ScoreManager:
     def __init__(self):
-        self.score = 100  # Initial score
+        self.player1_score = 100  # Initial score for Player 1
+        self.player2_score = 100  # Initial score for Player 2
 
     def update_score(self, player1, player2):
+        # Update Player 1's score
         if player1.collision_flag:
-            self.score -= 40
+            self.player1_score -= 50
             player1.collision_flag = False  # Reset flag after handling
-        if player2.collision_flag:
-            self.score -= 10
-            player2.collision_flag = False  # Reset flag after handling
-        if player1.reached_goal_flag or player2.reached_goal_flag:
-            self.score += 100
-            player1.reached_goal_flag = False  # Consider resetting these if you use them outside this logic
-            player2.reached_goal_flag = False
-        #self.score -= 1  # Subtract fixed reward for each time-step
+        if player1.reached_goal_flag:
+            self.player1_score += 1000
+            player1.reached_goal_flag = False  # Reset flag if needed
 
-    def get_score(self):
-        return self.score
+        # Update Player 2's score
+        if player2.collision_flag:
+            self.player2_score -= 10
+            player2.collision_flag = False  # Reset flag after handling
+        if player2.reached_goal_flag:
+            self.player2_score += 1000
+            player2.reached_goal_flag = False  # Reset flag if needed
+
+        # Optionally, you can have other conditions here to modify the scores
+
+    def get_player1_score(self):
+        return self.player1_score
+
+    def get_player2_score(self):
+        return self.player2_score
 
     def display_score(self, window, font):
-        score_text = font.render(f"Score: {self.get_score()}", True, BLACK)
-        window.blit(score_text, (10, 10))  # Position the score at the top-left corner
+        # Display Player 1's score
+        player1_score_text = font.render(f"Player 1 Score: {self.get_player1_score()}", True, BLACK)
+        window.blit(player1_score_text, (10, 10))  # Adjust position as needed
+
+        # Display Player 2's score
+        player2_score_text = font.render(f"Player 2 Score: {self.get_player2_score()}", True, BLACK)
+        window.blit(player2_score_text, (10, 40))  # Adjust position as needed
