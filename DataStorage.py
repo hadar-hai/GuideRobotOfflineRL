@@ -73,9 +73,9 @@ class GameData:
         return filename
 
     def update_state_vector(self, player1_state, player2_state, player1_score, player2_score):
-        # Get current timestamp
-        timestamp = datetime.now().isoformat()
-        combined_state = player1_state + [player1_score] + player2_state + [player2_score] + [timestamp]
+        # Get current time without the date
+        current_time = datetime.now().strftime("%H:%M:%S")
+        combined_state = player1_state + [player1_score] + player2_state + [player2_score] + [current_time]
 
         with open(self.filepath, 'a', newline='') as file:
             writer = csv.writer(file)
