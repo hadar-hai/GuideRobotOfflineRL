@@ -62,12 +62,15 @@ for filename in os.listdir(data_input_directory):
     distances_df = data.apply(calculate_distances, axis=1)
 
     # Add timestamp column
+    distances_df['P1_action'] = data['P1_Direction']
+    distances_df['P2_action'] = data['P2_Direction']
+    distances_df['reward'] = data['Total_Score']
     distances_df['timestamp_milliseconds'] = data['Elapsed_time_miliseconds']
-
+    
     columns_titles = ['P1_to_P2_distance', 'P1_to_obs_1_distance', 'P1_to_obs_2_distance', 'P1_to_obs_3_distance', 
                     'P1_to_obs_4_distance', 'P1_to_obs_5_distance','P2_to_obs_1_distance', 'P2_to_obs_2_distance', 
                     'P2_to_obs_3_distance', 'P2_to_obs_4_distance', 'P2_to_obs_5_distance',
-                    'P1_to_goal_distance', 'P2_to_goal_distance', 'timestamp_milliseconds']
+                    'P1_to_goal_distance', 'P2_to_goal_distance', 'P1_action', 'P2_action', 'reward', 'timestamp_milliseconds']
 
     distances_df.columns = columns_titles
 

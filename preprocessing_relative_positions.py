@@ -3,7 +3,6 @@ import useful_functions as uf
 import os
 
 
-
 # Loop over all the CSV files in the directory
 data_input_directory = '.\processed_data\game_and_map_data'
 data_output_directory = '.\processed_data\game_and_map_data_relative_positions'
@@ -64,14 +63,17 @@ for filename in os.listdir(data_input_directory):
     # Apply the function to each row
     relative_positions_df = data.apply(calculate_relative_positions, axis=1)
 
-    # Add timestamp column
+    # Add actions, reward and timestamp column
+    relative_positions_df['P1_action'] = data['P1_Direction']
+    relative_positions_df['P2_action'] = data['P2_Direction']
+    relative_positions_df['reward'] = data['Total_Score']
     relative_positions_df['timestamp_milliseconds'] = data['Elapsed_time_miliseconds']
 
     columns_titles = ['P1_to_P2_relative_position', 'P1_to_obs_1_relative_position', 'P1_to_obs_2_relative_position',
                       'P1_to_obs_3_relative_position', 'P1_to_obs_4_relative_position', 'P1_to_obs_5_relative_position'
                         ,'P2_to_obs_1_relative_position', 'P2_to_obs_2_relative_position', 'P2_to_obs_3_relative_position',
                         'P2_to_obs_4_relative_position', 'P2_to_obs_5_relative_position', 'P1_to_goal_relative_position',
-                        'P2_to_goal_relative_position', 'timestamp_milliseconds']
+                        'P2_to_goal_relative_position', 'P1_action', 'P2_action', 'reward', 'timestamp_milliseconds']
 
     relative_positions_df.columns = columns_titles
 
