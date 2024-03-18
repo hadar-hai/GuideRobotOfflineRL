@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import numpy as np
 import pandas as pd
 
@@ -55,9 +54,6 @@ def distance_to_obstacle(player_x, player_y, obstacle_x, obstacle_y, width, heig
     top_left, top_right, bottom_left, bottom_right = calculate_corners(obstacle_x, obstacle_y, width, height)
     # find the closest point on the rectangular obstacle to the player
     closest_x, closest_y = closest_point_on_rectangle(top_left, top_right, bottom_left, bottom_right, (player_x, player_y))
-=======
-import numpy as np
-import pandas as pd
 
 def closest_point_on_rectangle(top_left, top_right, bottom_left, bottom_right, point):
     # Define vectors representing edges of the rectangle
@@ -112,5 +108,4 @@ def distance_to_obstacle(player_x, player_y, obstacle_x, obstacle_y, width, heig
     top_left, top_right, bottom_left, bottom_right = calculate_corners(obstacle_x, obstacle_y, width, height)
     # find the closest point on the rectangular obstacle to the player
     closest_x, closest_y = closest_point_on_rectangle(top_left, top_right, bottom_left, bottom_right, (player_x, player_y))
->>>>>>> e10ee3d6883d0ea82b649a7dc3ceeda4b30b6fa5
     return euclidean_distance(player_x, player_y, closest_x, closest_y)
