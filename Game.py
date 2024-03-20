@@ -15,12 +15,14 @@ from DataStorage import *
 
 class Game:
 
-    def __init__(self, player1_agent = None, player2_agent = None):
+    def __init__(self, player1_agent = None, player2_agent = None, data_save_flag = False):
         # set agents
         # NOTE: if at least one of the agents it None, Game will assume both players are human and this is data collection.
 
         self.player1_agent = player1_agent  # robot actions. None = human player
         self.player2_agent = player2_agent # fake-human action. None = human player
+        
+        self.data_save_flag = data_save_flag
 
         # initialize pygame
         pygame.init()
@@ -40,8 +42,9 @@ class Game:
         self.goal_x, self.goal_y = self.place_entity_away_from_obstacles(20, self.obstacles)  # Assuming the goal size is 20
 
         # save map data (obstacles, goal) to map file - this is done once
-        self.map_data = MapData(self.obstacles, self.goal_x, self.goal_y)
-        self.map_data.update_map_data()
+        if data_save_flag:
+            self.map_data = MapData(self.obstacles, self.goal_x, self.goal_y)
+            self.map_data.update_map_data()
 
         # Initialize players
         self.player1 = Main_Player(self.window, self.robot_x, self.robot_y, self.obstacles, color=RED, player_size=PLAYER_SIZE)
@@ -56,7 +59,8 @@ class Game:
         self.goal = Goal(self.window, self.goal_x, self.goal_y, size=20, color=GREEN)
 
         # Initialize the game data structure
-        self.game_data = GameData()
+        if data_save_flag:
+            self.game_data = GameData()
         self.score_manager = ScoreManager()
 
         # Set obstacles and goals to agents (if there are agents)
@@ -81,6 +85,7 @@ class Game:
         # sys.exit()
 
     def game_loop(self, running=True, goal_reached = False):
+        data_save_flag = self.data_save_flag
         while running:
 
             # Handle events
@@ -176,7 +181,8 @@ class Game:
             player2_score = self.score_manager.player2_score
 
             # Call update_state_vector with scores
-            self.game_data.update_state_vector(player1_state, player2_state, player1_score, player2_score)
+            if data_save_flag:
+                self.game_data.update_state_vector(player1_state, player2_state, player1_score, player2_score)
             # Update the score based on current game state
             self.score_manager.update_score(self.player1, self.player2)
             self.score_manager.display_score(self.window, self.font)
