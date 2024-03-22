@@ -1,4 +1,4 @@
-# Game class
+
 
 import random
 import threading
@@ -421,4 +421,4 @@ class Game:
         instruction_label = tk.Label(root, text="Ready", font=("Helvetica", 24, "bold"))
         instruction_label.pack()
         update_instruction()
-        root.mainloop()
+

@@ -1,4 +1,4 @@
-# Internal Imports
+
 from Game import Game
 from Agents import *
 
@@ -22,3 +22,4 @@ game = Game(player1_agent, player2_agent, data_save_flag)
 goal_reached = game.game_loop(running, goal_reached)
 # quit the game when it's done
 game.quit_game()
+
