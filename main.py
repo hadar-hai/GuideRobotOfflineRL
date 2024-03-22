@@ -3,8 +3,8 @@ from Game import Game
 from Agents import *
 
 # Set agents.
-player1_agent = GoalFollow()
-player2_agent = EpsilonLeashFollow()
+player1_agent = BehaviorCloningAgentCSVData()
+player2_agent = GoalFollow()
 
 # Main game loop
 running = True

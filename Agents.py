@@ -1,6 +1,9 @@
 import random
 from global_parameters import *
 from math import sqrt
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+import numpy as np
 
 class Agent:
     '''
@@ -61,7 +64,8 @@ class EpsilonLeashFollow(Agent):
         self.action = 4
 
     def get_state_set_action(self, state=None):
-        self.current_state = state
+        self.current_state =state
+        print("STATE",state)
         # initialize action to noop
         dx = 0
         dy = 0
@@ -171,6 +175,7 @@ class EpsilonLeashFollow(Agent):
 
         return dx, dy, selected_action
 
+
 class Roomba(Agent):
     # This agent picks a random direction and makes a finite amount of steps in that direction
     def __init__(self, obstacles=None, goal=None):
@@ -235,6 +240,7 @@ class GoalFollow(Agent):
 
     def get_state_set_action(self, state=None):
         self.current_state = state
+        print("STATE", state)
 
         # defaults
         action = 4
@@ -342,3 +348,83 @@ class GoalFollow(Agent):
             dy = -PLAYER_SPEED
 
         return dx, dy, selected_action
+
+class BehaviorCloningAgentCSVData(Agent):
+
+    def __init__(self, obstacles=None, goal=None):
+            super().__init__(obstacles, goal)
+
+            self.model = load_model('checkpoints/model_checkpoint2.h5', compile=False)
+            self.obstacles = obstacles
+            self.goal = goal
+
+    import numpy as np
+
+    def preprocess_state(self, state):
+        p1_x, p1_y, p2_x, p2_y = state
+        relative_positions = []
+
+        # Player 1 to Player 2 relative position
+        p1_to_p2 = [p2_x - p1_x, p2_y - p1_y]
+        relative_positions.extend(p1_to_p2)
+
+        # Calculate distances from Player 1 and Player 2 to each obstacle
+        p1_distances = [((obstacle.x - p1_x) ** 2 + (obstacle.y - p1_y) ** 2) ** 0.5 for obstacle in self.obstacles]
+        p2_distances = [((obstacle.x - p2_x) ** 2 + (obstacle.y - p2_y) ** 2) ** 0.5 for obstacle in self.obstacles]
+
+        # Get the indices of the 5 closest obstacles for each player
+        p1_closest_indices = np.argsort(p1_distances)[:5]
+        p2_closest_indices = np.argsort(p2_distances)[:5]
+
+        # Add the relative positions of the 5 closest obstacles to Player 1
+        for index in p1_closest_indices:
+            obstacle = self.obstacles[index]
+            p1_to_obs = [obstacle.x - p1_x, obstacle.y - p1_y]
+            relative_positions.extend(p1_to_obs)
+
+        # Add the relative positions of the 5 closest obstacles to Player 2
+        for index in p2_closest_indices:
+            obstacle = self.obstacles[index]
+            p2_to_obs = [obstacle.x - p2_x, obstacle.y - p2_y]
+            relative_positions.extend(p2_to_obs)
+
+        # Player 1 and Player 2 to goal relative position
+        goal_x = self.goal.rect.x
+        goal_y = self.goal.rect.y
+        p1_to_goal = [goal_x - p1_x, goal_y - p1_y]
+        p2_to_goal = [goal_x - p2_x, goal_y - p2_y]
+        relative_positions.extend(p1_to_goal)
+        relative_positions.extend(p2_to_goal)
+
+        # Reshape for model input
+        processed_state = np.array(relative_positions).reshape(1, -1)
+        return processed_state
+
+    def get_state_set_action(self, state=None):
+        processed_state = self.preprocess_state(state)
+        predictions = self.model.predict(processed_state)
+
+        # Assuming the model directly predicts dx, dy, and action
+        selected_action = predictions[0]
+        selected_action = np.argmax(selected_action)
+
+
+        dx = 0
+        dy = 0
+        if selected_action == 0:
+            # left
+            dx = -PLAYER_SPEED
+        elif selected_action == 1:
+            # right
+            dx = PLAYER_SPEED
+        elif selected_action == 2:
+            # up
+            dy = PLAYER_SPEED
+        elif selected_action == 3:
+            # down
+            dy = -PLAYER_SPEED
+
+
+
+        return dx, dy, selected_action
+

@@ -51,7 +51,7 @@ class Game:
 
         # Initialize Leash
         self.leash = Leash(self.window, self.player1, self.player2, LEASH_MAX_LENGTH)
-
+        #self.leash_dist=len(self.leash)
         # Initialize goal
         self.goal = Goal(self.window, self.goal_x, self.goal_y, size=20, color=GREEN)
 
@@ -74,7 +74,7 @@ class Game:
         self.tk_thread = threading.Thread(target=self.run_tkinter_gui, args=(self.shared_commands,))
         self.tk_thread.daemon = True
         self.tk_thread.start()
-
+        self.leash_dist=0
     def quit_game(self):
         # Quit Pygame
         pygame.quit()
