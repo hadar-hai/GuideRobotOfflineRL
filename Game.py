@@ -1,4 +1,4 @@
-# Game class
+
 
 import random
 import threading
@@ -15,12 +15,14 @@ from DataStorage import *
 
 class Game:
 
-    def __init__(self, player1_agent = None, player2_agent = None):
+    def __init__(self, player1_agent = None, player2_agent = None, data_save_flag = False):
         # set agents
         # NOTE: if at least one of the agents it None, Game will assume both players are human and this is data collection.
 
         self.player1_agent = player1_agent  # robot actions. None = human player
         self.player2_agent = player2_agent # fake-human action. None = human player
+        
+        self.data_save_flag = data_save_flag
 
         # initialize pygame
         pygame.init()
@@ -40,8 +42,9 @@ class Game:
         self.goal_x, self.goal_y = self.place_entity_away_from_obstacles(20, self.obstacles)  # Assuming the goal size is 20
 
         # save map data (obstacles, goal) to map file - this is done once
-        self.map_data = MapData(self.obstacles, self.goal_x, self.goal_y)
-        self.map_data.update_map_data()
+        if data_save_flag:
+            self.map_data = MapData(self.obstacles, self.goal_x, self.goal_y)
+            self.map_data.update_map_data()
 
         # Initialize players
         self.player1 = Main_Player(self.window, self.robot_x, self.robot_y, self.obstacles, color=RED, player_size=PLAYER_SIZE)
@@ -51,12 +54,13 @@ class Game:
 
         # Initialize Leash
         self.leash = Leash(self.window, self.player1, self.player2, LEASH_MAX_LENGTH)
-        #self.leash_dist=len(self.leash)
+
         # Initialize goal
         self.goal = Goal(self.window, self.goal_x, self.goal_y, size=20, color=GREEN)
 
         # Initialize the game data structure
-        self.game_data = GameData()
+        if data_save_flag:
+            self.game_data = GameData()
         self.score_manager = ScoreManager()
 
         # Set obstacles and goals to agents (if there are agents)
@@ -74,13 +78,14 @@ class Game:
         self.tk_thread = threading.Thread(target=self.run_tkinter_gui, args=(self.shared_commands,))
         self.tk_thread.daemon = True
         self.tk_thread.start()
-        self.leash_dist=0
+
     def quit_game(self):
         # Quit Pygame
         pygame.quit()
         # sys.exit()
 
     def game_loop(self, running=True, goal_reached = False):
+        data_save_flag = self.data_save_flag
         while running:
 
             # Handle events
@@ -100,14 +105,26 @@ class Game:
             player2_y = self.player2.rect.centery
             self.current_state = [player1_x, player1_y, player2_x, player2_y]
 
-            # Get player input
-            if not (self.player1_agent and self.player2_agent):
-                # If one of the agents is not defined - assume human input (data collections)
-                dx1, dy1, direction_player1, dx2, dy2, direction_player2 = self.get_player_input()
+            # # Get player input
+            # if not (self.player1_agent and self.player2_agent):
+            #     # If one of the agents is not defined - assume human input (data collections)
+            #     dx1, dy1, direction_player1, dx2, dy2, direction_player2 = self.get_player_input()
+            #
+            # else:
+            #     # Both agents are defined - choose action according to agent policy
+            #     dx1, dy1, direction_player1 = self.player1_agent.get_state_set_action(self.current_state)
+            #     dx2, dy2, direction_player2 = self.player2_agent.get_state_set_action(self.current_state)
 
+            # Get player1 input
+            if not self.player1_agent:
+                dx1, dy1, direction_player1 = self.get_player1_input()
             else:
-                # Both agents are defined - choose action according to agent policy
                 dx1, dy1, direction_player1 = self.player1_agent.get_state_set_action(self.current_state)
+
+            # Get player2 input
+            if not self.player2_agent:
+                dx2, dy2, direction_player2 = self.get_player2_input()
+            else:
                 dx2, dy2, direction_player2 = self.player2_agent.get_state_set_action(self.current_state)
 
             self.dx_player1 = dx1
@@ -159,8 +176,13 @@ class Game:
 
             # Increment timestep after each loop iteration
             # Update the game state vector
-            self.game_data.update_state_vector(player1_state, player2_state)
 
+            player1_score = self.score_manager.player1_score
+            player2_score = self.score_manager.player2_score
+
+            # Call update_state_vector with scores
+            if data_save_flag:
+                self.game_data.update_state_vector(player1_state, player2_state, player1_score, player2_score)
             # Update the score based on current game state
             self.score_manager.update_score(self.player1, self.player2)
             self.score_manager.display_score(self.window, self.font)
@@ -212,6 +234,58 @@ class Game:
         else:
             # If the leash is not taut or no direct opposition in movement, proceed with player 1's intended movement
             self.player1.move(self.dx_player1, self.dy_player1, self.font)
+
+    def get_player1_input(self):
+        # Get the state of all keys
+        keys = pygame.key.get_pressed()
+
+        # Initialize movement deltas for both players
+        dx_player1, dy_player1 = 0, 0
+        direction_player1 = 4  # Stationary
+
+        # Player 1 Movement Input
+        if keys[pygame.K_LEFT]:
+            dx_player1 = -PLAYER_SPEED
+            direction_player1 = 0  # Left
+            self.shared_commands["instruction"] = "Move Left"
+        elif keys[pygame.K_RIGHT]:
+            dx_player1 = PLAYER_SPEED
+            direction_player1 = 1  # Right
+            self.shared_commands["instruction"] = "Move Right"
+        elif keys[pygame.K_UP]:
+            dy_player1 = -PLAYER_SPEED
+            direction_player1 = 2  # Up
+            self.shared_commands["instruction"] = "Move Up"
+        elif keys[pygame.K_DOWN]:
+            dy_player1 = PLAYER_SPEED
+            direction_player1 = 3  # Down
+            self.shared_commands["instruction"] = "Move Down"
+
+        return dx_player1, dy_player1, direction_player1
+
+    def get_player2_input(self):
+        # Get the state of all keys
+        keys = pygame.key.get_pressed()
+
+        # Initialize movement deltas for both players
+        dx_player2, dy_player2 = 0, 0
+        direction_player2 = 4  # Stationary
+
+        # Player 2 Movement Input
+        if keys[pygame.K_a]:
+            dx_player2 = -PLAYER_SPEED
+            direction_player2 = 0  # Left
+        elif keys[pygame.K_d]:
+            dx_player2 = PLAYER_SPEED
+            direction_player2 = 1  # Right
+        elif keys[pygame.K_w]:
+            dy_player2 = -PLAYER_SPEED
+            direction_player2 = 2  # Up
+        elif keys[pygame.K_s]:
+            dy_player2 = PLAYER_SPEED
+            direction_player2 = 3  # Down
+
+        return dx_player2, dy_player2, direction_player2
 
     def get_player_input(self):
         # Get the state of all keys
@@ -347,4 +421,4 @@ class Game:
         instruction_label = tk.Label(root, text="Ready", font=("Helvetica", 24, "bold"))
         instruction_label.pack()
         update_instruction()
-        root.mainloop()
+
