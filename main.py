@@ -3,7 +3,7 @@ from Game import Game
 from Agents import *
 
 # Set agents.
-player1_agent = BehaviorCloningAgentCSVData()
+player1_agent = BehaviorCloningAgent()
 player2_agent = GoalFollow()
 
 # Main game loop

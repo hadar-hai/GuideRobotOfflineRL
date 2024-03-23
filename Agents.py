@@ -4,7 +4,12 @@ from math import sqrt
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 import numpy as np
-
+import time
+import os
+import matplotlib.pyplot as plt
+import useful_functions as uf
+from matplotlib.patches import Rectangle
+import cv2
 class Agent:
     '''
     General agent class. Here we can modify agent inputs, outputs and general functions.
@@ -428,3 +433,104 @@ class BehaviorCloningAgentCSVData(Agent):
 
         return dx, dy, selected_action
 
+
+class BehaviorCloningAgent(Agent):
+    def __init__(self, obstacles=None, goal=None):
+        super().__init__(obstacles, goal)
+        self.obstacles = obstacles
+        self.goal = goal
+
+    def create_image(self, state):
+        obstacles = self.obstacles
+        goal = self.goal
+        text_time = str(time.time())
+        filename = text_time + ".png"
+        saving_path_images = "./temp_images/"
+
+        # create the folder if it does not exist
+        if not os.path.exists(saving_path_images):
+            os.makedirs(saving_path_images)
+
+        goal_x, goal_y = goal.rect.centerx, HEIGHT - goal.rect.centery
+
+        P1_X = state[0]
+        P1_Y = state[1]
+        P2_X = state[2]
+        P2_Y = state[3]
+
+        # Create a new figure
+        plt.figure(figsize=(WIDTH / 100, HEIGHT / 100))
+
+        # Plot the goal
+        plt.scatter(goal_x, HEIGHT - goal_y, color='green', label='Goal')
+
+        # Plot the obstacles
+        for obstacle in obstacles:
+            obstacle = obstacle.rect
+            plt.gca().add_patch(
+                Rectangle((obstacle.left, obstacle.top), obstacle.width, obstacle.height, color='black'))
+
+        plt.scatter(P1_X, P1_Y, color='red', label='Robot')
+        plt.scatter(P2_X, P2_Y, color='blue', label='Human')
+
+        if uf.euclidean_distance(P1_X, P1_Y, P2_X, P2_Y) >= 50:
+            plt.plot([P1_X, P2_X], [P1_Y, P2_Y], color='yellow')
+
+        # Set plot limits and labels
+        plt.xlim(0, WIDTH)
+        plt.ylim(0, HEIGHT)
+        plt.gca().invert_yaxis()  # Invert y-axis to match the new orientation
+
+        temp_img_path = os.path.join(saving_path_images, filename)
+        plt.savefig(temp_img_path)
+        plt.close()
+        return temp_img_path
+
+    def get_state_set_action(self, state=None):
+        '''
+        :param state: positions of player 1 and player 2 (format?)
+        :return: dx, dy, direction
+        '''
+        # create image
+        temp_img_path = self.create_image(state)
+        # load image from temp_img_path
+        image = cv2.imread(temp_img_path, cv2.IMREAD_COLOR)
+        image = cv2.resize(image, (50, 50))
+        # Reshape X to match model input shape
+        image = image.reshape(-1, 50, 50, 3)
+
+        # Normalize pixel values to be between 0 and 1
+        image = image.astype('float32') / 255.0
+
+        # Load the model
+        model = load_model('checkpoints/model_checkpoint_imagecode.h5', compile=False)
+
+        # Compile the model (recompilation is needed after loading)
+        model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        # Make predictions
+        predictions = model.predict(image)
+        predicted_action = 0
+        predicted_action = int(np.argmax(predictions[0]))
+
+        dx, dy = 0, 0
+        # return the action
+        # defaults
+        if predicted_action == 0:
+            # left
+            dx = -PLAYER_SPEED
+        elif predicted_action == 1:
+            # right
+            dx = PLAYER_SPEED
+        elif predicted_action == 2:
+            # up
+            dy = PLAYER_SPEED
+        elif predicted_action == 3:
+            # down
+            dy = -PLAYER_SPEED
+        action = predicted_action
+
+        # delete the image
+        os.remove(temp_img_path)
+        # wait for the process to finish
+        time.sleep(1)
+        return dx, dy, action
