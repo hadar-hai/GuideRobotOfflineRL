@@ -8,7 +8,7 @@ data_output_directory = '.\processed_data\game_and_map_data_distances'
 if data_output_directory not in os.listdir('.\processed_data'):
     os.mkdir(data_output_directory)
     
-# Calculate relative positions
+# Calculate distances
 def calculate_distances(row):
     distances = []
 

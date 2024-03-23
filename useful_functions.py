@@ -110,7 +110,7 @@ def distance_to_obstacle(player_x, player_y, obstacle_x, obstacle_y, width, heig
     closest_x, closest_y = closest_point_on_rectangle(top_left, top_right, bottom_left, bottom_right, (player_x, player_y))
     return euclidean_distance(player_x, player_y, closest_x, closest_y)
 
-def points_in_radius_on_rectangular(top_left, top_right, bottom_left, bottom_right, center, radius):
+def points_in_radius_on_rectangle(top_left, top_right, bottom_left, bottom_right, center, radius):
     points = []
     # find the center of the rectangle
     rectangle_center = ((top_left[0] + top_right[0]) / 2, (top_left[1] + bottom_left[1]) / 2)

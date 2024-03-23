@@ -32,10 +32,10 @@ def calculate_relative_positions(row):
         obs_width = row['obs_' + str(obstacle_num) + '_width']
         top_left, top_right, bottom_left, bottom_right = uf.calculate_corners(obs_x, obs_y, obs_width, obs_height)
         # find all points on the rectangle that are within the radius of the player only if not empty:
-        points_in_p1_radius_on_rectangular = uf.points_in_radius_on_rectangular(top_left, top_right, bottom_left, bottom_right, (row['P1_X'], row['P1_Y']), radius)
+        points_in_p1_radius_on_rectangular = uf.points_in_radius_on_rectangle(top_left, top_right, bottom_left, bottom_right, (row['P1_X'], row['P1_Y']), radius)
         if points_in_p1_radius_on_rectangular:
             a = 1
-        points_in_p2_radius_on_rectangular = uf.points_in_radius_on_rectangular(top_left, top_right, bottom_left, bottom_right, (row['P2_X'], row['P2_Y']), radius)
+        points_in_p2_radius_on_rectangular = uf.points_in_radius_on_rectangle(top_left, top_right, bottom_left, bottom_right, (row['P2_X'], row['P2_Y']), radius)
         if points_in_p1_radius_on_rectangular:
             points_in_p1_radius.append(points_in_p1_radius_on_rectangular)
         if points_in_p2_radius_on_rectangular:
