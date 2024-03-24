@@ -1,0 +1,7 @@
+Test accuracy: 0.9361743927001953
+Confusion matrix: 
+tf.Tensor(
+[[2186   42   84   80]
+ [  85 2627   84   38]
+ [  32   26 2602   41]
+ [  60   31   47 2119]], shape=(4, 4), dtype=int32)
