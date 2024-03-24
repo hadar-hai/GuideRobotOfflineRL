@@ -1,9 +1,9 @@
-
+# Internal Imports
 from Game import Game
 from Agents import *
 
 # Set agents.
-player1_agent = BehavioralCloningAgent()
+player1_agent = BehavioralCloning_ImagesBasedAgent()
 player2_agent = EpsilonLeashFollow()
 
 # Data saving flag:
@@ -22,4 +22,3 @@ game = Game(player1_agent, player2_agent, data_save_flag)
 goal_reached = game.game_loop(running, goal_reached)
 # quit the game when it's done
 game.quit_game()
-
