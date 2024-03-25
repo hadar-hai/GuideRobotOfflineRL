@@ -38,11 +38,17 @@ for game = 1:total_games
     % append array to all_data and labels
     all_data = [all_data; big_game_data_array];
 
+    
+
     labels = [labels; labels_data_array];
 end
+% remove last 4 columns of the data - P1_action, P2_action, score, time
+all_data(:,(width(all_data)-3):width(all_data)) = [];
 
 % Make Table and Save File
-new_variable_names = horzcat( {'players_id', 'game_id'}, game_data_table.Properties.VariableNames);
+variable_names_0 = game_data_table.Properties.VariableNames;
+variable_names=variable_names_0(1:no_of_data_parameters-4);
+new_variable_names = horzcat( {'players_id', 'game_id'}, variable_names);
 
 all_data_table = array2table(all_data, 'VariableNames', new_variable_names);
 save_file_name = sprintf("allgames_data.csv");
