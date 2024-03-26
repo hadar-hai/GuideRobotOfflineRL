@@ -1,14 +1,17 @@
 import pandas as pd
-import useful_functions as uf
 import os
+import sys
+# one folder up
+sys.path.insert(1, './')
+import useful_functions as uf
 
 radius = 50
 
 # Loop over all the CSV files in the directory
-data_input_path = '.\processed_data\game_and_map_data'
-data_output_path = '.\processed_data\game_and_map_data_distances_in_radius'
+data_input_path = '.\data\processed_data\game_and_map_data'
+data_output_path = '.\data\processed_data\game_and_map_data_distances_in_radius'
 data_output_directory = data_output_path.split('\\')[-1]
-if data_output_directory not in os.listdir('.\processed_data'):
+if data_output_directory not in os.listdir('.\processed_data\data\\'):
     os.mkdir(data_output_path)
 
 # calculate distances
