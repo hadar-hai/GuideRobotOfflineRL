@@ -4,6 +4,7 @@ import useful_functions as uf
 from global_parameters import *
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+import os
 
 
 # Define the class for the useful functions
@@ -209,6 +210,9 @@ class UsefulFunctions_ForPreprocessing:
 
         time_ = pygame.time.get_ticks()
         # save 
+        path = '.\lidar'
+        if not os.path.exists(path):
+            os.makedirs(path)
         plt.savefig('.\lidar\lidar_measurements ' + str(time_) + '.png')
         
     def plot_lidar_measurements_on_screen(self, measurements, state = None, obstacles = None, goal = None):
