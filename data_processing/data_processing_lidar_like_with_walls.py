@@ -42,7 +42,7 @@ def process_fun(filename):
         measurements_df['timestamp_milliseconds'] = data['Elapsed_time_miliseconds']
 
         columns_titles = []
-        columns_titles.extend(['P1_lidar_meas_in_' + str(i) + '_deg' for i in range(360)])
+        columns_titles.extend(['P1_lidar_meas_in_' + str(i) + '_deg' for i in range(0, 360, 1)])
         columns_titles.extend(['P1_action', 'P2_action', 'reward', 'timestamp_milliseconds'])
 
         measurements_df.columns = columns_titles
@@ -121,8 +121,8 @@ def lidar_measurements(row):
             # if the obstacle is not in the ray's direction continue
             if ((0 < angle < 180) and (top_left_y < p1_y) and (bottom_right_y < p1_y)) or ((180 < angle < 360) and (top_left_y > p1_y) and (bottom_right_y > p1_y)):
                 continue
-            if ((90 < angle < 270) and (top_left_x > p1_x) and (bottom_right_x > p1_x)) or ((270 < angle < 360 or 0 < angle < 90) and (top_left_x < p1_x) and (bottom_right_x < p1_x)):
-                continue              
+            if ((90 < angle < 270) and (top_left_x > p1_x) and (bottom_right_x > p1_x)) or ((270 < angle <= 360 or 0 <= angle < 90) and (top_left_x < p1_x) and (bottom_right_x < p1_x)):
+                continue
             a, b, c = line_equation_find(p1_x, p1_y, ray_x, ray_y)
             y_inter = lambda x: (-a*x - c) / b if b != 0 else None
             x_inter = lambda y: (-b*y - c) / a if a != 0 else None
@@ -203,8 +203,8 @@ def lidar_measurements(row):
     #     intersection_point = measurements[angle][2]
     #     if intersection_point:
     #         plt.plot([p1_x, intersection_point[0]], [p1_y, intersection_point[1]], color='red')
-        # draw the lidar rays 
-        # plt.plot([p1_x, p1_x + math.cos(math.radians(angle)) * RADIUS], [p1_y, p1_y + math.sin(math.radians(angle)) * RADIUS], color='pink')
+    #     # draw the lidar rays 
+    #     # plt.plot([p1_x, p1_x + math.cos(math.radians(angle)) * RADIUS], [p1_y, p1_y + math.sin(math.radians(angle)) * RADIUS], color='pink')
     # plt.xlim(0, WIDTH)
     # plt.ylim(0, HEIGHT)
     # plt.show()
