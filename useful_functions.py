@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 def closest_point_on_rectangle(top_left, top_right, bottom_left, bottom_right, point):
     # Define vectors representing edges of the rectangle
     edges = [(top_left, top_right), (top_right, bottom_right),
@@ -151,4 +152,11 @@ def points_in_radius_on_rectangle(top_left, top_right, bottom_left, bottom_right
     for y in range(int(bottom_left[1]), int(top_left[1]), -1):
         if euclidean_distance(center[0], center[1], bottom_left[0], y) <= radius:
             points.append((bottom_left[0], y))
-    return points 
+    return points
+
+def line_equation_find(x1, y1, x2, y2):
+    a = y2 - y1
+    b = x1 - x2
+    c = x2 * y1 - x1 * y2
+    return a, b, c
+
