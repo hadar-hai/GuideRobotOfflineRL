@@ -8,8 +8,8 @@ sys.path.insert(1, './')
 import useful_functions as uf
 
 # Load the data
-file_name = 'dataset_1_game_08'
-data = pd.read_csv(".\data\processed_data\game_and_map_data\\" + file_name + ".csv")
+file_name = 'dataset_3_game_12'
+data = pd.read_csv(".\data\processed_data\game_and_map_data\\" + file_name + "_predicted.csv")
 
 plot_extra_flag = False
 
@@ -94,4 +94,5 @@ plt.legend()
 # Show plot
 plt.gca().invert_yaxis()  # Invert y-axis to match the new orientation
 plt.grid(True)
-plt.show()
+plt.savefig(".\data\processed_data\plots\\" + file_name + "_predicted.png")
+plt.close()
