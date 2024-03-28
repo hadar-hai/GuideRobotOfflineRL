@@ -41,9 +41,9 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
         
     def calculate_lidar_measurements(self, state = None, RADIUS = WIDTH*(1/3)): 
         # All beams:
-        # lidar_density = 1
+        lidar_density = 1
         # Less beams:
-        lidar_density = 10
+        # lidar_density = 10
         measurements = self.preprocessing.calculate_lidar_measurements(state, self.obstacles, self.goal, lidar_density = lidar_density, lidar_range = RADIUS)
         # plot lidar measurements for debugging:
         # self.preprocessing.plot_lidar_measurements_on_fig(measurements, state, self.obstacles, self.goal)
@@ -60,11 +60,14 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
         measurements = np.append(measurements, [P1_goal_dist_x, P1_goal_dist_y])
         input_dim = len(measurements)
         # All beams: 
-        # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal.pkl"
-        # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth"
+        self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal.pkl"
+        self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth"
         # Less beams:
-        self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_less_beams_with_goal.pkl"
-        self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_less_beams_with_goal.pth"       
+        # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_less_beams_with_goal.pkl"
+        # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_less_beams_with_goal.pth"       
+        # All beams, less epochs:
+        # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal_less_epochs.pkl"
+        # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_less_epochs.pth"
         
         self.scaler = joblib.load(self.scaler_path)
         self.model = LidarLikeNet.LidarLikeNet(input_dim=input_dim, output_dim=5) 

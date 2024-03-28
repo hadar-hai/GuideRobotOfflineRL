@@ -16,7 +16,7 @@ np.random.seed(0)
 
 # Define file paths
 features_path = r".\data\processed_data\game_and_map_data_lidar\lidar_like_data.csv"
-scaler_path = r".\data_based_agents\models\scalers\behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth"
+scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal_less_epochs.pkl"
 
 # Load data
 data = pd.read_csv(features_path).drop(columns=['final_row_flag', 'file_name'])
@@ -112,7 +112,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Training the model
-num_epochs = 200
+num_epochs = 30
 train_losses, val_losses, val_accuracies = [], [], []
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -149,14 +149,14 @@ plt.plot(val_losses, label='Val Loss')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()
-plt.savefig(r".\data_based_agents\plots\train_val_loss_lidar_pytorch_without_not_moving_with_goal.png")
+plt.savefig(r".\data_based_agents\plots\train_val_loss_lidar_pytorch_without_not_moving_with_goal_less_epochs.png")
 plt.close()
 
 plt.plot(val_accuracies, label='Val Accuracy')
 plt.xlabel('Epoch')
 plt.ylabel('Accuracy')
 plt.legend()
-plt.savefig(r".\data_based_agents\plots\val_accuracy_lidar_pytorch_without_not_moving_with_goal.png")
+plt.savefig(r".\data_based_agents\plots\val_accuracy_lidar_pytorch_without_not_moving_with_goal_less_epochs.png")
 
 
 # Evaluate the model
@@ -180,10 +180,10 @@ plt.figure(figsize=(10, 7))
 sns.heatmap(conf_matrix, annot=True, fmt='d')
 plt.xlabel('Predicted labels')
 plt.ylabel('True labels')
-plt.savefig(r".\data_based_agents\plots\confusion_matrix_lidar_pytorch_without_not_moving_with_goal.png")
+plt.savefig(r".\data_based_agents\plots\confusion_matrix_lidar_pytorch_without_not_moving_with_goal_less_epochs.png")
 
 # Save the scaler
 joblib.dump(scaler, scaler_path)
 
 #save the model 
-torch.save(model.state_dict(), r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth")
+torch.save(model.state_dict(), r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_less_epochs.pth")

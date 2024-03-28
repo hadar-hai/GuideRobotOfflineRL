@@ -17,7 +17,7 @@ np.random.seed(0)
 # Define file paths
 features_path = r".\data\processed_data\lidar_3beam_data_new_r_with_filenames.csv"
 labels_path = r".\data\processed_data\game_and_map_data_lidar_like_with_walls_arranged\labels.csv"
-scaler_path = r".\data_based_agents\models\scalers\scaler_pytorch_without_not_moving.pkl"
+scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving.pkl"
 
 # Load data
 features = pd.read_csv(features_path).drop(columns=['final_row_flag', 'file_name'])
