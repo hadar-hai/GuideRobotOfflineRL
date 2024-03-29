@@ -18,6 +18,7 @@ import torch.nn as nn
 from sklearn.preprocessing import MinMaxScaler
 import joblib
 import LidarLikeNet
+import LidarLikeNet01
 from useful_functions_for_data_processing import UsefulFunctions_ForPreprocessing as uf_pp
 
 
@@ -32,62 +33,60 @@ class Agent:
         self.obstacles = obstacles
         self.goal = goal
 
-
 class BehavioralCloning_LidarBased_WithGoal_SuccesfulTrials(Agent):
-    def __init__(self, obstacles=None, goal=None):
-        super().__init__(obstacles, goal)
-        self.obstacles = obstacles
-        self.goal = goal
-        self.preprocessing = uf_pp()
-        self.model = load_model('checkpoints/model_checkpoint_LIDAR_02.h5', compile=False)
+    def __init__(self,  obstacles=None, goal=None):
+            super().__init__(obstacles, goal)
+            self.obstacles = obstacles
+            self.goal = goal
+            self.preprocessing = uf_pp()
+            self.model_path = "checkpoints/model_checkpoint_LIDAR_succesfultrials_1.pth"
+            self.model = None
+
+    def initialize_model(self, input_dim):
+            '''Initialize and load the model based on input_dim'''
+            self.model = LidarLikeNet01.LidarLikeNet01(input_dim=input_dim, output_dim=5)  # Assuming output_dim=5
+
+            self.model.load_state_dict(torch.load(self.model_path, map_location=torch.device('cpu')))
+            self.model.eval()  # Set the model to evaluation mode
 
     def calculate_lidar_measurements(self, state=None, RADIUS=WIDTH * (1 / 3)):
-        # All beams:
         lidar_density = 1
-        # Less beams:
-        # lidar_density = 10
         measurements = self.preprocessing.calculate_lidar_measurements(state, self.obstacles, self.goal,
                                                                        lidar_density=lidar_density, lidar_range=RADIUS)
-        # plot lidar measurements for debugging:
-        # self.preprocessing.plot_lidar_measurements_on_fig(measurements, state, self.obstacles, self.goal)
+        measurements = np.append(measurements, 0)
         return measurements
 
     def predict_action(self, state):
-        # Calculate lidar measurements
         measurements = self.calculate_lidar_measurements(state)
-        # Flatten the measurements
         measurements = np.ravel(measurements)
-        # add the goal distances to the measurements
         P1_goal_dist_x = state[0] - self.goal.rect.centerx
         P1_goal_dist_y = state[1] - self.goal.rect.centery
         measurements = np.append(measurements, [P1_goal_dist_x, P1_goal_dist_y])
-        input_dim = len(measurements)
-        # All beams:
-        #self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal.pkl"
-        #self.model_path = r".\checkpoints\model_checkpoint_LIDAR_02.h5"
-        # Less beams:
-        # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_less_beams_with_goal.pkl"
-        # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_less_beams_with_goal.pth"
-        # All beams, less epochs:
-        # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal_less_epochs.pkl"
-        # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_less_epochs.pth"
 
-        #self.scaler = joblib.load(self.scaler_path)
-        #self.model = LidarLikeNet.LidarLikeNet(input_dim=input_dim, output_dim=5)
-        #self.model.load_state_dict(torch.load(self.model_path))
-        self.model.eval()
 
-        # Normalize using the loaded scaler
-        measurements = self.scaler.transform([measurements])
-        # Convert to torch tensor
-        x_tensor = torch.tensor(measurements, dtype=torch.float32)
-        # Make predictions
+        self.initialize_model(input_dim=len(measurements))
+
+        # Convert measurements to a PyTorch tensor
+        x_tensor = torch.tensor([measurements], dtype=torch.float32)
+
+        # Make predictions with the model
         with torch.no_grad():
             predictions = self.model(x_tensor)
-        # Get the predicted action
         predicted_action = predictions.argmax(dim=1).item()
-        print("Predicted action: ", predicted_action)
         return predicted_action
+
+    def get_state_set_action(self, state=None):
+        predicted_action = self.predict_action(state)
+        dx, dy = 0, 0
+        if predicted_action == 0:
+            dx = -PLAYER_SPEED  # Left
+        elif predicted_action == 1:
+            dx = PLAYER_SPEED  # Right
+        elif predicted_action == 2:
+            dy = -PLAYER_SPEED  # Up
+        elif predicted_action == 3:
+            dy = PLAYER_SPEED  # Down
+        return dx, dy, predicted_action
 
 
 class BehavioralCloning_LidarBased_WithGoal(Agent):
