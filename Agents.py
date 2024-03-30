@@ -434,6 +434,20 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         # Normalize pixel values to be between 0 and 1
         image = image.astype('float32') / 255.0
         
+        image_shape = image.shape
+        
+        # image flatten
+        image = image.reshape(image.shape[0], -1)
+        
+        # load scaler
+        scaler_path = r".\data_based_agents\scalers\scaler_without_4_action_small_map.pkl"
+        scaler = joblib.load(scaler_path)
+        # Standardize the data
+        image = scaler.transform(image)
+        
+        # Reshape the scaled data back to the original shape
+        image = image.reshape(image_shape)
+
         # Load the model
         if with_4_action:
             model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100.h5', compile=False)
@@ -455,16 +469,16 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         # defaults
         if predicted_action == 0:
             #left
-            dx = -PLAYER_SPEED
+            dx = PLAYER_SPEED
         elif predicted_action == 1:
             #right
-            dx = PLAYER_SPEED
+            dx = -PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         action = predicted_action
         
         # delete the image
@@ -496,10 +510,10 @@ class RandomAgent(Agent):
             dx = PLAYER_SPEED
         elif selected_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif selected_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
 
         return dx, dy, selected_action
 
@@ -574,12 +588,12 @@ class EpsilonLeashFollow(Agent):
                 dx = PLAYER_SPEED
         else:
             # y-axis is dominant - move up or down
-            if player1_y > player2_y: # player 1 is higher - go up
+            if player1_y < player2_y: # player 1 is higher - go up
                 action = 2
-                dy = PLAYER_SPEED
+                dy = -PLAYER_SPEED
             else: #move down
                 action = 3
-                dy = -PLAYER_SPEED
+                dy = PLAYER_SPEED
 
         return dx, dy, action
 
@@ -624,10 +638,10 @@ class EpsilonLeashFollow(Agent):
             dx = PLAYER_SPEED
         elif selected_action == 2:
             # up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif selected_action == 3:
             # down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
 
         return dx, dy, selected_action
 
@@ -669,10 +683,10 @@ class Roomba(Agent):
                 dx = PLAYER_SPEED
             elif action == 2:
                 # up
-                dy = PLAYER_SPEED
+                dy = -PLAYER_SPEED
             elif action == 3:
                 # down
-                dy = -PLAYER_SPEED
+                dy = PLAYER_SPEED
 
             self.current_action = action
             self.dx = dx
@@ -751,10 +765,10 @@ class GoalFollow(Agent):
             # move up or down
             if goal_y > player2_y: #goal is upwards - move up
                 action = 2
-                dy = PLAYER_SPEED
+                dy = -PLAYER_SPEED
             else: #goal is downwards - move down
                 action = 3
-                dy = -PLAYER_SPEED
+                dy = PLAYER_SPEED
 
         return dx, dy, action
 
@@ -796,9 +810,57 @@ class GoalFollow(Agent):
             dx = PLAYER_SPEED
         elif selected_action == 2:
             # up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif selected_action == 3:
             # down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
 
         return dx, dy, selected_action
+
+class GoalFollowImproved(Agent):
+    # This robot agent goes in the direction of the goal.
+    # if the robot is close to the goal - it will try to get it
+    # no obstacle avoidance
+    def __init__(self, obstacles = None, goal = None):
+        super().__init__(obstacles, goal)
+        self.obstacles = obstacles
+        self.goal = goal
+
+    def get_state_set_action(self, state=None):
+        self.current_state = state
+
+        # defaults
+        action = 4
+        dx = 0
+        dy = 0
+
+        self.player1_x = state[0]
+        self.player1_y = state[1]
+        self.player2_x = state[2]
+        self.player2_y = state[3]
+        
+        self.goal_x = self.goal.rect.centerx
+        self.goal_y = self.goal.rect.centery
+                
+        # move towards the goal, assuming the human follows the leash
+        angle = math.atan2(self.goal_y - self.player2_y, self.goal_x - self.player2_x)
+            
+        dx = PLAYER_SPEED * math.cos(angle)
+        dy = PLAYER_SPEED * math.sin(angle)
+        
+        if abs(dx) > abs(dy):
+            if dx < 0: # move left
+                action = 0
+                dx = -PLAYER_SPEED
+            else: # move right
+                action = 1
+                dx = PLAYER_SPEED
+        else:
+            if dy < 0: # move up
+                action = 2
+                dy = -PLAYER_SPEED
+            else: # move down 
+                action = 3
+                dy = PLAYER_SPEED
+        
+        return dx, dy, action
