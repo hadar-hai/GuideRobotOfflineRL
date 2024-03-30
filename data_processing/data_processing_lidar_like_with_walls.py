@@ -9,15 +9,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
 
-WIDTH = 800
-HEIGHT = 600
-RADIUS = 1/3*WIDTH
+WIDTH = 400
+HEIGHT = 300
+RADIUS = (1/3)*WIDTH
 
 # Loop over all the CSV files in the directory
-data_input_path = '/data/processed_data/game_and_map_data'
-data_output_path = '/data/processed_data/game_and_map_data_lidar_like_with_walls'
+data_input_path = '/smallmap_data/processed_data/game_and_map_data'
+data_output_path = '/smallmap_data/processed_data/game_and_map_data_lidar_like_with_walls'
 data_output_directory = data_output_path.split('/')[-1]
-if data_output_directory not in os.listdir('./data/processed_data/'):
+if data_output_directory not in os.listdir('./smallmap_data/processed_data/'):
     os.mkdir("." + data_output_path)
 
 def process_fun(filename): 

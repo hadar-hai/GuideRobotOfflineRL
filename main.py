@@ -3,12 +3,12 @@ from Game import Game
 from Agents import *
 
 # Set agents.
-player1_agent = None
+player1_agent = BehavioralCloning_LidarBased()
 # player1_agent.with_4_action = False
 player2_agent = EpsilonLeashFollow()
 
 # Data saving flag:
-data_save_flag = True
+data_save_flag = False
 
 # Main game loop
 running = True

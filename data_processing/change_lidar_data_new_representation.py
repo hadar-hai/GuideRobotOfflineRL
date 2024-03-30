@@ -7,9 +7,9 @@ WIDTH = 800
 HEIGHT = 600
 RADIUS = round(1/3*WIDTH)
 
-input_folder = 'data/processed_data/game_and_map_data_lidar_like_with_walls'
-original_folder = 'data/processed_data/game_and_map_data'
-output_folder = 'data/processed_data/game_and_map_data_lidar'
+input_folder = 'smallmap_data/processed_data/game_and_map_data_lidar_like_with_walls'
+original_folder = 'smallmap_data/processed_data/game_and_map_data'
+output_folder = 'smallmap_data/processed_data/game_and_map_data_lidar'
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
 
