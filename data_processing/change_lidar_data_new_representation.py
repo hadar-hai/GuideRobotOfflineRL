@@ -3,8 +3,8 @@ import os
 import numpy as np
 from multiprocessing import Pool
 
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 400 # 800
+HEIGHT = 300 # 600
 RADIUS = round(1/3*WIDTH)
 
 input_folder = 'data/processed_data/game_and_map_data_lidar_like_with_walls'

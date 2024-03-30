@@ -54,14 +54,18 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
         measurements = self.calculate_lidar_measurements(state)
         # Flatten the measurements
         measurements = np.ravel(measurements)
+        
         # add the goal distances to the measurements
-        P1_goal_dist_x = state[0] - self.goal.rect.centerx
-        P1_goal_dist_y = state[1] - self.goal.rect.centery
+        P1_goal_dist_x = self.goal.rect.centerx - state[0]
+        P1_goal_dist_y = self.goal.rect.centery - state[1]
         measurements = np.append(measurements, [P1_goal_dist_x, P1_goal_dist_y])
         input_dim = len(measurements)
+        # New data:
+        self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal_small_map.pkl"
+        self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_small_map.pth"
         # All beams: 
-        self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal.pkl"
-        self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth"
+        # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal.pkl"
+        # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth"
         # Less beams:
         # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_less_beams_with_goal.pkl"
         # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_less_beams_with_goal.pth"       
@@ -70,7 +74,7 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
         # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_less_epochs.pth"
         
         self.scaler = joblib.load(self.scaler_path)
-        self.model = LidarLikeNet.LidarLikeNet(input_dim=input_dim, output_dim=5) 
+        self.model = LidarLikeNet.LidarLikeNet(input_dim=input_dim, output_dim=4) 
         self.model.load_state_dict(torch.load(self.model_path))
         self.model.eval()
         
