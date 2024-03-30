@@ -17,8 +17,6 @@ class Game:
 
     def __init__(self, player1_agent = None, player2_agent = None, data_save_flag = False):
         # set agents
-        # NOTE: if at least one of the agents it None, Game will assume both players are human and this is data collection.
-
         self.player1_agent = player1_agent  # robot actions. None = human player
         self.player2_agent = player2_agent # fake-human action. None = human player
         
