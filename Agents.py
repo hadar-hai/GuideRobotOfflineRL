@@ -8,7 +8,7 @@ import useful_functions as uf
 import os
 import pygame
 import time
-from tensorflow.keras.models import load_model
+# from tensorflow.keras.models import load_model
 import numpy as np
 # import cv2
 from sklearn.preprocessing import StandardScaler
@@ -85,7 +85,8 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
             predictions = self.model(x_tensor)
         # Get the predicted action
         predicted_action = predictions.argmax(dim=1).item()
-        # print("Predicted action: ", predicted_action)
+        if predicted_action != 1:
+            print("Predicted action: ", predicted_action)
         return predicted_action
 
     def get_state_set_action(self, state=None):
