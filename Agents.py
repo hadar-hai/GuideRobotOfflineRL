@@ -8,7 +8,7 @@ import useful_functions as uf
 import os
 import pygame
 import time
-# from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model
 import numpy as np
 # import cv2
 from sklearn.preprocessing import StandardScaler
@@ -32,139 +32,139 @@ class Agent:
         self.obstacles = obstacles
         self.goal = goal
         
-# class BehavioralCloning_LidarBased_WithGoal(Agent):
-#     def __init__(self, obstacles = None, goal = None):
-#         super().__init__(obstacles, goal)
-#         self.obstacles = obstacles
-#         self.goal = goal
-#         self.preprocessing = uf_pp()
-#
-#     def calculate_lidar_measurements(self, state = None, RADIUS = WIDTH*(1/3)):
-#         # All beams:
-#         lidar_density = 1
-#         # Less beams:
-#         # lidar_density = 10
-#         measurements = self.preprocessing.calculate_lidar_measurements(state, self.obstacles, self.goal, lidar_density = lidar_density, lidar_range = RADIUS)
-#         # plot lidar measurements for debugging:
-#         # self.preprocessing.plot_lidar_measurements_on_fig(measurements, state, self.obstacles, self.goal)
-#         return measurements
-#
-#     def predict_action(self, state):
-#         # Calculate lidar measurements
-#         measurements = self.calculate_lidar_measurements(state)
-#         # Flatten the measurements
-#         measurements = np.ravel(measurements)
-#         # add the goal distances to the measurements
-#         P1_goal_dist_x = state[0] - self.goal.rect.centerx
-#         P1_goal_dist_y = state[1] - self.goal.rect.centery
-#         measurements = np.append(measurements, [P1_goal_dist_x, P1_goal_dist_y])
-#         input_dim = len(measurements)
-#         # All beams:
-#         self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal.pkl"
-#         self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth"
-#         # Less beams:
-#         # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_less_beams_with_goal.pkl"
-#         # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_less_beams_with_goal.pth"
-#         # All beams, less epochs:
-#         # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal_less_epochs.pkl"
-#         # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_less_epochs.pth"
-#
-#         self.scaler = joblib.load(self.scaler_path)
-#         self.model = LidarLikeNet.LidarLikeNet(input_dim=input_dim, output_dim=5)
-#         self.model.load_state_dict(torch.load(self.model_path))
-#         self.model.eval()
-#
-#
-#
-#         # Normalize using the loaded scaler
-#         measurements = self.scaler.transform([measurements])
-#         # Convert to torch tensor
-#         x_tensor = torch.tensor(measurements, dtype=torch.float32)
-#         # Make predictions
-#         with torch.no_grad():
-#             predictions = self.model(x_tensor)
-#         # Get the predicted action
-#         predicted_action = predictions.argmax(dim=1).item()
-#         print("Predicted action: ", predicted_action)
-#         return predicted_action
-#
-#     def get_state_set_action(self, state=None):
-#         '''
-#         :param state: positions of player 1 and player 2 (format?)
-#         :return: dx, dy, direction
-#         '''
-#         predicted_action = self.predict_action(state)
-#
-#         dx, dy = 0, 0
-#         # return the action
-#         # defaults
-#         if predicted_action == 0:
-#             #left
-#             dx = -PLAYER_SPEED
-#         elif predicted_action == 1:
-#             #right
-#             dx = PLAYER_SPEED
-#         elif predicted_action == 2:
-#             #up
-#             dy = PLAYER_SPEED
-#         elif predicted_action == 3:
-#             #down
-#             dy = -PLAYER_SPEED
-#         action = predicted_action
-#
-#         return dx, dy, action
-# class BehavioralCloning_LidarLikeTF(Agent):
-#     def __init__(self, obstacles = None, goal = None):
-#         super().__init__(obstacles, goal)
-#         self.obstacles = obstacles
-#         self.goal = goal
-#         self.preprocessing = uf_pp()
-#
-#     def calculate_lidar_measurements(self, state = None, RADIUS = WIDTH*(1/3)):
-#         measurements = self.preprocessing.calculate_lidar_measurements(state, self.obstacles, self.goal, lidar_density = 1, lidar_range = RADIUS)
-#         return measurements
-#
-#
-#     def get_state_set_action(self, state=None):
-#
-#         measurements = self.calculate_lidar_measurements(state)
-#         model = load_model('.\data_based_agents\models\\behavior_cloning_lidar_tf.h5', compile=False)
-#
-#         # Compile the model (recompilation is needed after loading)
-#         model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-#         # load the scaler
-#         scaler_path = r".\data\processed_data\scaler_tf.pkl"
-#         scaler = joblib.load(scaler_path)
-#         # Convert to numpy array
-#         measurements = np.array(measurements)
-#         # Reshape the measurements
-#         measurements = measurements.reshape(-1, 1080)
-#         # Normalize the measurements
-#         measurements = scaler.transform(measurements)
-#
-#
-#         # Make predictions
-#         predictions = model.predict(measurements)
-#         predicted_action = int(np.argmax(predictions))
-#
-#         dx, dy = 0, 0
-#         # return the action
-#         # defaults
-#         if predicted_action == 0:
-#             #left
-#             dx = -PLAYER_SPEED
-#         elif predicted_action == 1:
-#             #right
-#             dx = PLAYER_SPEED
-#         elif predicted_action == 2:
-#             #up
-#             dy = PLAYER_SPEED
-#         elif predicted_action == 3:
-#             #down
-#             dy = -PLAYER_SPEED
-#         action = predicted_action
-#
-#         return dx, dy, action
+class BehavioralCloning_LidarBased_WithGoal(Agent):
+    def __init__(self, obstacles = None, goal = None):
+        super().__init__(obstacles, goal)
+        self.obstacles = obstacles
+        self.goal = goal
+        self.preprocessing = uf_pp()
+
+    def calculate_lidar_measurements(self, state = None, RADIUS = WIDTH*(1/3)):
+        # All beams:
+        lidar_density = 1
+        # Less beams:
+        # lidar_density = 10
+        measurements = self.preprocessing.calculate_lidar_measurements(state, self.obstacles, self.goal, lidar_density = lidar_density, lidar_range = RADIUS)
+        # plot lidar measurements for debugging:
+        # self.preprocessing.plot_lidar_measurements_on_fig(measurements, state, self.obstacles, self.goal)
+        return measurements
+
+    def predict_action(self, state):
+        # Calculate lidar measurements
+        measurements = self.calculate_lidar_measurements(state)
+        # Flatten the measurements
+        measurements = np.ravel(measurements)
+        # add the goal distances to the measurements
+        P1_goal_dist_x = -(state[0] - self.goal.rect.centerx)
+        P1_goal_dist_y = -(state[1] - self.goal.rect.centery)
+        measurements = np.append(measurements, [P1_goal_dist_x, P1_goal_dist_y])
+        input_dim = len(measurements)
+        # All beams:
+        self.scaler_path = r".\data_based_agents\scalers\scaler_smallmap_pytorch_without_not_moving_with_goal.pkl"
+        self.model_path = r".\data_based_agents\models\smallmap_behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth"
+        # Less beams:
+        # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_less_beams_with_goal.pkl"
+        # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_less_beams_with_goal.pth"
+        # All beams, less epochs:
+        # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal_less_epochs.pkl"
+        # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_less_epochs.pth"
+
+        self.scaler = joblib.load(self.scaler_path)
+        self.model = LidarLikeNet.LidarLikeNet(input_dim=input_dim, output_dim=4)
+        self.model.load_state_dict(torch.load(self.model_path))
+        self.model.eval()
+
+
+
+        # Normalize using the loaded scaler
+        measurements = self.scaler.transform([measurements])
+        # Convert to torch tensor
+        x_tensor = torch.tensor(measurements, dtype=torch.float32)
+        # Make predictions
+        with torch.no_grad():
+            predictions = self.model(x_tensor)
+        # Get the predicted action
+        predicted_action = predictions.argmax(dim=1).item()
+        # print("Predicted action: ", predicted_action)
+        return predicted_action
+
+    def get_state_set_action(self, state=None):
+        '''
+        :param state: positions of player 1 and player 2 (format?)
+        :return: dx, dy, direction
+        '''
+        predicted_action = self.predict_action(state)
+
+        dx, dy = 0, 0
+        # return the action
+        # defaults
+        if predicted_action == 0:
+            #left
+            dx = -PLAYER_SPEED
+        elif predicted_action == 1:
+            #right
+            dx = PLAYER_SPEED
+        elif predicted_action == 2:
+            #up
+            dy = PLAYER_SPEED
+        elif predicted_action == 3:
+            #down
+            dy = -PLAYER_SPEED
+        action = predicted_action
+
+        return dx, dy, action
+class BehavioralCloning_LidarLikeTF(Agent):
+    def __init__(self, obstacles = None, goal = None):
+        super().__init__(obstacles, goal)
+        self.obstacles = obstacles
+        self.goal = goal
+        self.preprocessing = uf_pp()
+
+    def calculate_lidar_measurements(self, state = None, RADIUS = WIDTH*(1/3)):
+        measurements = self.preprocessing.calculate_lidar_measurements(state, self.obstacles, self.goal, lidar_density = 1, lidar_range = RADIUS)
+        return measurements
+
+
+    def get_state_set_action(self, state=None):
+
+        measurements = self.calculate_lidar_measurements(state)
+        model = load_model(r'.\data_based_agents\models\\behavior_cloning_lidar_tf.h5', compile=False)
+
+        # Compile the model (recompilation is needed after loading)
+        model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        # load the scaler
+        scaler_path = r".\data\processed_data\scaler_tf.pkl"
+        scaler = joblib.load(scaler_path)
+        # Convert to numpy array
+        measurements = np.array(measurements)
+        # Reshape the measurements
+        measurements = measurements.reshape(-1, 1080)
+        # Normalize the measurements
+        measurements = scaler.transform(measurements)
+
+
+        # Make predictions
+        predictions = model.predict(measurements)
+        predicted_action = int(np.argmax(predictions))
+
+        dx, dy = 0, 0
+        # return the action
+        # defaults
+        if predicted_action == 0:
+            #left
+            dx = -PLAYER_SPEED
+        elif predicted_action == 1:
+            #right
+            dx = PLAYER_SPEED
+        elif predicted_action == 2:
+            #up
+            dy = PLAYER_SPEED
+        elif predicted_action == 3:
+            #down
+            dy = -PLAYER_SPEED
+        action = predicted_action
+
+        return dx, dy, action
 #
 class BehavioralCloning_LidarBased(Agent):
     def __init__(self, obstacles = None, goal = None):
@@ -324,9 +324,9 @@ class BehavioralCloning_DistancesBasedAgent(Agent):
 
         # Load the model
         if with_4_action:
-            model = load_model('.\data_based_agents\models\\behavior_cloning_distances.h5', compile=False)
+            model = load_model(r'.\data_based_agents\models\\behavior_cloning_distances.h5', compile=False)
         else:
-            model = load_model('.\data_based_agents\models\\behavior_cloning_distances_not_moving_action_removed.h5', compile=False)
+            model = load_model(r'.\data_based_agents\models\\behavior_cloning_distances_not_moving_action_removed.h5', compile=False)
 
         # Compile the model (recompilation is needed after loading)
         model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
@@ -427,9 +427,9 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
 
         # Load the model
         if with_4_action:
-            model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100.h5', compile=False)
+            model = load_model(r'.\data_based_agents\models\\behavior_cloning_cnn_100.h5', compile=False)
         else:
-            model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_not_moving_action_removed.h5', compile=False)
+            model = load_model(r'.\data_based_agents\models\\behavior_cloning_cnn_100_not_moving_action_removed.h5', compile=False)
 
         # Compile the model (recompilation is needed after loading)
         model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
