@@ -15,7 +15,8 @@ torch.manual_seed(0)
 np.random.seed(0)
 
 # Define file paths
-features_path = r".\data\processed_data\game_and_map_data_lidar\lidar_like_data.csv"
+# features_path = r".\data\processed_data\game_and_map_data_lidar\lidar_like_data.csv"
+features_path = r".\smallmap_data\processed_data\game_and_map_data_lidar\lidar_like_data.csv"
 scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal_small_map.pkl"
 
 # Load data
@@ -26,9 +27,6 @@ features = data.drop(columns=['P1_action'])
 # remove the not moving class from the data
 features = features[labels['P1_action'] != 4]
 labels = labels[labels['P1_action'] != 4]
-
-# if feature value is above 267, set it to RADIUS*(1/3)
-features[features >= 267] = 133
 
 # def get_title(i):
 #     if i < 10:
@@ -184,7 +182,7 @@ plt.figure(figsize=(10, 7))
 sns.heatmap(conf_matrix, annot=True, fmt='d')
 plt.xlabel('Predicted labels')
 plt.ylabel('True labels')
-plt.savefig(r".\data_based_agents\plots\confusion_matrix_lidar_pytorch_without_not_moving_with_goal_small_map_small_map.png")
+plt.savefig(r".\data_based_agents\plots\confusion_matrix_lidar_pytorch_without_not_moving_with_goal_small_map.png")
 
 # Save the scaler
 joblib.dump(scaler, scaler_path)
