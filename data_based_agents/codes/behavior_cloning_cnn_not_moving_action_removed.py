@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 import os
+import joblib
 
 # Define the CNN model
 def create_model(input_shape):
@@ -43,12 +44,14 @@ current_dir = os.path.dirname(__file__)
 two_folders_before = os.path.abspath(os.path.join(current_dir, '..', '..'))
 
 # Load labels from CSV file
-labels_dir = os.path.join(two_folders_before, 'data', 'processed_data', 'processed_data_images')
+# labels_dir = os.path.join(two_folders_before, 'data', 'processed_data', 'processed_data_images')
+labels_dir = os.path.join(two_folders_before, 'smallmap_data', 'processed_data', 'processed_data_images')
 labels_filename = "labels.csv"
 labels_df = pd.read_csv(os.path.join(labels_dir, labels_filename))
 
 # Load images
-image_dir = os.path.join(two_folders_before, 'data', 'processed_data', 'processed_data_images')
+# image_dir = os.path.join(two_folders_before, 'data', 'processed_data', 'processed_data_images')
+image_dir = os.path.join(two_folders_before, 'smallmap_data', 'processed_data', 'processed_data_images')
 # # Get list of image paths without labels.csv
 # image_paths = [os.path.join(image_dir, filename) for filename in os.listdir(image_dir) if filename != labels_filename]
 # remove labels of 4 action
@@ -59,6 +62,9 @@ labels = []
 
 # Model folder
 model_dir = os.path.join(two_folders_before, 'data_based_agents','models')
+scaler_path = r".\data_based_agents\scalers\scaler_without_4_action_small_map.pkl"
+
+
 
 # Iterate through image paths
 for image_path in image_paths:
@@ -111,6 +117,8 @@ X_test_flat = X_test.reshape(x_test_shape[0], -1)
 
 # Initialize StandardScaler and fit it to the training data
 x_scaler = StandardScaler().fit(X_train_flat)
+# save the scaler
+joblib.dump(x_scaler, scaler_path)
 
 # Transform the training, validation, and test data using the scaler
 X_train_scaled = x_scaler.transform(X_train_flat)
@@ -124,7 +132,7 @@ X_test_scaled = X_test_scaled.reshape(x_test_shape)
 
 # Store training and validation loss and accuracy in csv file
 # Train the model
-history = model.fit(X_train_scaled, y_train, epochs=50, batch_size=32, validation_data=(X_val_scaled, y_val))
+history = model.fit(X_train_scaled, y_train, epochs=20, batch_size=128, validation_data=(X_val_scaled, y_val))
 
 # Plot training and validation loss
 plt.plot(history.history['loss'], label='train')
@@ -132,11 +140,12 @@ plt.plot(history.history['val_loss'], label='validation')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()
-plt.show()
+plt.savefig(r".\data_based_agents\plots\train_val_loss_cnn_100_without_not_moving_with_goal_small_map.png")
+plt.close()
 
 # Save in csv
 history_df = pd.DataFrame(history.history)
-history_df.to_csv(model_dir + "\\behavior_cloning_cnn_100_without_4_action.csv")
+history_df.to_csv(model_dir + "\\behavior_cloning_cnn_100_without_4_action_small_map.csv")
 
 # Evaluate the model
 test_loss, test_acc = model.evaluate(X_test_scaled, y_test, verbose=2)
@@ -148,12 +157,20 @@ y_pred = np.argmax(y_pred, axis=1)
 confusion_matrix = tf.math.confusion_matrix(y_test, y_pred)
 print(confusion_matrix)
 
+# plot the confusion matrix
+plt.figure(figsize=(10, 7))
+plt.imshow(confusion_matrix, cmap='binary')
+plt.xlabel('Predicted labels')
+plt.ylabel('True labels')
+plt.savefig(r".\data_based_agents\plots\confusion_matrix_cnn_100_without_not_moving_with_goal_small_map.png")
+plt.close()
+
 # save test accuracy and confusion matrix in text file
-with open(model_dir + "\\behavior_cloning_cnn_100_without_4_action.txt", "w") as f:
+with open(model_dir + "\\behavior_cloning_cnn_100_without_4_action_small_map.txt", "w") as f:
     f.write("Test accuracy: " + str(test_acc) + "\n")
     f.write("Confusion matrix: \n")
     f.write(str(confusion_matrix)) 
 
 
 # Save the model
-model.save(model_dir + "\\behavior_cloning_cnn_100_without_4_action.h5")
+model.save(model_dir + "\\behavior_cloning_cnn_100_without_4_action_small_map.h5")
