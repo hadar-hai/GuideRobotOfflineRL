@@ -74,7 +74,7 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
         # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_less_epochs.pth"
         
         self.scaler = joblib.load(self.scaler_path)
-        self.model = LidarLikeNet.LidarLikeNet(input_dim=input_dim, output_dim=4) 
+        self.model = LidarLikeNet.LidarLikeNet(input_dim=input_dim, output_dim=4) # 5) 
         self.model.load_state_dict(torch.load(self.model_path))
         self.model.eval()
         
@@ -110,10 +110,10 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
             dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         return dx, dy, action
@@ -162,10 +162,10 @@ class BehavioralCloning_LidarLikeTF(Agent):
             dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         return dx, dy, action
@@ -228,10 +228,10 @@ class BehavioralCloning_LidarBased(Agent):
             dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         return dx, dy, action
@@ -353,10 +353,10 @@ class BehavioralCloning_DistancesBasedAgent(Agent):
             dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         return dx, dy, action
@@ -390,7 +390,7 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         plt.figure(figsize=(WIDTH/100, HEIGHT/100))
 
         # Plot the goal
-        plt.scatter(goal_x, HEIGHT - goal_y, color='green', label='Goal')
+        plt.scatter(goal_x, HEIGHT - goal_y, color='green', marker = "s", label='Goal')
 
         # Plot the obstacles
         for obstacle in obstacles:
@@ -424,18 +424,22 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         temp_img_path = self.create_image(state)
         # load image from temp_img_path
         image = cv2.imread(temp_img_path, cv2.IMREAD_COLOR)
+        # min value of the image
         image = cv2.resize(image, (100, 100))
+         # save the image
+        # cv2.imwrite("image.png", image)       
         # Reshape X to match model input shape
         image = image.reshape(-1, 100, 100, 3)
-
+        
         # Normalize pixel values to be between 0 and 1
         image = image.astype('float32') / 255.0
-
+        
         # Load the model
         if with_4_action:
             model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100.h5', compile=False)
         else: 
-            model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_not_moving_action_removed.h5', compile=False)
+            # model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_not_moving_action_removed.h5', compile=False)
+            model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_without_4_action_small_map.h5', compile=False)
 
         # Compile the model (recompilation is needed after loading)
         model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
@@ -457,10 +461,10 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
             dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         # delete the image
