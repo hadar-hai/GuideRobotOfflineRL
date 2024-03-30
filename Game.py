@@ -22,6 +22,8 @@ class Game:
         
         self.data_save_flag = data_save_flag
 
+        self.leash_dist =0 # initializing to avoid error
+
         # initialize pygame
         pygame.init()
         self.font = pygame.font.Font(None, 36)
