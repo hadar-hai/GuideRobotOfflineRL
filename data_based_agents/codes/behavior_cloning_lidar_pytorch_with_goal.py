@@ -114,7 +114,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 
 # Training the model
-num_epochs = 100
+num_epochs = 200
 train_losses, val_losses, val_accuracies = [], [], []
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
