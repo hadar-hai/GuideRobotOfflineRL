@@ -7,10 +7,11 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 import os
 import joblib
 
-# Define the CNN model
 def create_model(input_shape):
     model = models.Sequential()
     
@@ -21,9 +22,16 @@ def create_model(input_shape):
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
     
-    # Dense layers
+    # Flatten layer
     model.add(layers.Flatten())
+
+    # Dense layers with dropout
     model.add(layers.Dense(64, activation='relu'))
+    model.add(layers.Dropout(0.5))  # Add dropout with 50% rate
+    model.add(layers.Dense(32, activation='relu'))
+    model.add(layers.Dropout(0.5))  # Add dropout with 50% rate
+
+    # Output layer
     model.add(layers.Dense(4, activation='softmax'))  # 4 output classes
     
     # Compile the model
@@ -62,7 +70,7 @@ labels = []
 
 # Model folder
 model_dir = os.path.join(two_folders_before, 'data_based_agents','models')
-scaler_path = r".\data_based_agents\scalers\scaler_without_4_action_small_map.pkl"
+scaler_path = r".\data_based_agents\scalers\scaler_cnn_100_without_not_moving_small_map.pkl"
 
 
 
@@ -132,7 +140,7 @@ X_test_scaled = X_test_scaled.reshape(x_test_shape)
 
 # Store training and validation loss and accuracy in csv file
 # Train the model
-history = model.fit(X_train_scaled, y_train, epochs=20, batch_size=128, validation_data=(X_val_scaled, y_val))
+history = model.fit(X_train_scaled, y_train, epochs=30, batch_size=32, validation_data=(X_val_scaled, y_val))
 
 # Plot training and validation loss
 plt.plot(history.history['loss'], label='train')
@@ -140,12 +148,15 @@ plt.plot(history.history['val_loss'], label='validation')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()
-plt.savefig(r".\data_based_agents\plots\train_val_loss_cnn_100_without_not_moving_with_goal_small_map.png")
+plt.savefig(r".\data_based_agents\plots\train_val_loss_cnn_100_without_not_moving_small_map.png")
 plt.close()
 
-# Save in csv
-history_df = pd.DataFrame(history.history)
-history_df.to_csv(model_dir + "\\behavior_cloning_cnn_100_without_4_action_small_map.csv")
+val_accuracies = history.history['val_accuracy']
+plt.plot(val_accuracies, label='Val Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.savefig(r".\data_based_agents\plots\val_accuracy_cnn_100_without_not_moving_small_map.png")
 
 # Evaluate the model
 test_loss, test_acc = model.evaluate(X_test_scaled, y_test, verbose=2)
@@ -154,23 +165,22 @@ print('\nTest accuracy:', test_acc)
 # confusion matrix
 y_pred = model.predict(X_test_scaled)
 y_pred = np.argmax(y_pred, axis=1)
-confusion_matrix = tf.math.confusion_matrix(y_test, y_pred)
-print(confusion_matrix)
-
-# plot the confusion matrix
+# Calculate the confusion matrix
+conf_matrix = confusion_matrix(y_test, y_pred)
+# Save the confusion matrix as a plot
 plt.figure(figsize=(10, 7))
-plt.imshow(confusion_matrix, cmap='binary')
+sns.heatmap(conf_matrix, annot=True, fmt='d')
 plt.xlabel('Predicted labels')
 plt.ylabel('True labels')
-plt.savefig(r".\data_based_agents\plots\confusion_matrix_cnn_100_without_not_moving_with_goal_small_map.png")
+plt.savefig(r".\data_based_agents\plots\confusion_matrix_cnn_100_without_not_moving_small_map.png")
 plt.close()
 
-# save test accuracy and confusion matrix in text file
-with open(model_dir + "\\behavior_cloning_cnn_100_without_4_action_small_map.txt", "w") as f:
-    f.write("Test accuracy: " + str(test_acc) + "\n")
-    f.write("Confusion matrix: \n")
-    f.write(str(confusion_matrix)) 
+# # save test accuracy and confusion matrix in text file
+# with open(model_dir + "\\behavior_cloning_cnn_100_without_4_action_small_map.txt", "w") as f:
+#     f.write("Test accuracy: " + str(test_acc) + "\n")
+#     f.write("Confusion matrix: \n")
+#     f.write(str(confusion_matrix)) 
 
 
 # Save the model
-model.save(model_dir + "\\behavior_cloning_cnn_100_without_4_action_small_map.h5")
+model.save(model_dir + "\\behavior_cloning_cnn_100_without_not_moving_small_map.h5")
