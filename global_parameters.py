@@ -12,4 +12,4 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
-NUM_OBSTACLES = 3 # 6 # 30
+NUM_OBSTACLES = 6 # 6 # 30

@@ -38,18 +38,23 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
         self.obstacles = obstacles
         self.goal = goal
         self.preprocessing = uf_pp()
+        self.lidar_based_with_goal_less_beams_flag = False
         
     def calculate_lidar_measurements(self, state = None, RADIUS = WIDTH*(1/3)): 
-        # All beams:
-        lidar_density = 1
-        # Less beams:
-        # lidar_density = 10
+        lidar_based_with_goal_less_beams_flag = self.lidar_based_with_goal_less_beams_flag
+        if lidar_based_with_goal_less_beams_flag:
+            # Less beams:
+            lidar_density = 5
+        else:
+            # All beams:
+            lidar_density = 1
         measurements = self.preprocessing.calculate_lidar_measurements(state, self.obstacles, self.goal, lidar_density = lidar_density, lidar_range = RADIUS)
         # plot lidar measurements for debugging:
         # self.preprocessing.plot_lidar_measurements_on_fig(measurements, state, self.obstacles, self.goal)
         return measurements
             
     def predict_action(self, state):
+        lidar_based_with_goal_less_beams_flag = self.lidar_based_with_goal_less_beams_flag
         # Calculate lidar measurements
         measurements = self.calculate_lidar_measurements(state)
         # Flatten the measurements
@@ -60,9 +65,15 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
         P1_goal_dist_y = self.goal.rect.centery - state[1]
         measurements = np.append(measurements, [P1_goal_dist_x, P1_goal_dist_y])
         input_dim = len(measurements)
-        # New data:
-        self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal_small_map.pkl"
-        self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_small_map.pth"
+        if lidar_based_with_goal_less_beams_flag: 
+            # New data, less beams:
+            self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_less_beams_with_goal_small_map.pkl"
+            self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_less_beams_with_goal_small_map.pth"
+        else:
+            # New data:
+            self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal_small_map.pkl"
+            self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_small_map.pth"
+
         # All beams: 
         # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal.pkl"
         # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth"
@@ -362,11 +373,10 @@ class BehavioralCloning_DistancesBasedAgent(Agent):
         return dx, dy, action
 
 class BehavioralCloning_ImagesBasedAgent(Agent):
-    def __init__(self, obstacles = None, goal = None, with_4_action = False):
+    def __init__(self, obstacles = None, goal = None):
         super().__init__(obstacles, goal)
         self.obstacles = obstacles
         self.goal = goal
-        self.with_4_action = False
                 
     def create_image(self, state):
         obstacles = self.obstacles
@@ -379,7 +389,7 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         if not os.path.exists(saving_path_images):
             os.makedirs(saving_path_images)
 
-        goal_x, goal_y = goal.rect.centerx, HEIGHT - goal.rect.centery
+        goal_x, goal_y = goal.rect.centerx, goal.rect.centery
         
         P1_X = state[0]
         P1_Y = state[1]
@@ -390,7 +400,7 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         plt.figure(figsize=(WIDTH/100, HEIGHT/100))
 
         # Plot the goal
-        plt.scatter(goal_x, HEIGHT - goal_y, color='green', marker = "s", label='Goal')
+        plt.scatter(goal_x, goal_y, color='green', marker = "s", label='Goal')
 
         # Plot the obstacles
         for obstacle in obstacles:
@@ -419,7 +429,6 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         :param state: positions of player 1 and player 2 (format?)
         :return: dx, dy, direction
         '''
-        with_4_action = self.with_4_action
         # create image
         temp_img_path = self.create_image(state)
         # load image from temp_img_path
@@ -427,7 +436,7 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         # min value of the image
         image = cv2.resize(image, (100, 100))
          # save the image
-        # cv2.imwrite("image.png", image)       
+        cv2.imwrite(r"./data_based_agents/images_inprocess/image.png", image)       
         # Reshape X to match model input shape
         image = image.reshape(-1, 100, 100, 3)
         
@@ -437,10 +446,10 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         image_shape = image.shape
         
         # image flatten
-        image = image.reshape(image.shape[0], -1)
+        image = image.reshape(image_shape[0], -1)
         
         # load scaler
-        scaler_path = r".\data_based_agents\scalers\scaler_without_4_action_small_map.pkl"
+        scaler_path = r".\data_based_agents\scalers\scaler_cnn_100_without_not_moving_small_map.pkl"
         scaler = joblib.load(scaler_path)
         # Standardize the data
         image = scaler.transform(image)
@@ -449,11 +458,11 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         image = image.reshape(image_shape)
 
         # Load the model
-        if with_4_action:
-            model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100.h5', compile=False)
-        else: 
-            # model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_not_moving_action_removed.h5', compile=False)
-            model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_without_4_action_small_map.h5', compile=False)
+        # if with_4_action:
+        #     model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100.h5', compile=False)
+        # else: 
+        # model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_not_moving_action_removed.h5', compile=False)
+        model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_without_not_moving_small_map.h5', compile=False)
 
         # Compile the model (recompilation is needed after loading)
         model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
@@ -469,22 +478,21 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         # defaults
         if predicted_action == 0:
             #left
-            dx = PLAYER_SPEED
+            dx = -PLAYER_SPEED
         elif predicted_action == 1:
             #right
-            dx = -PLAYER_SPEED
+            dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         # delete the image
         os.remove(temp_img_path)
         # wait for the process to finish
-        time.sleep(0.5)
         return dx, dy, action
         
         
