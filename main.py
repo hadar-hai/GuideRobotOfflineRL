@@ -3,7 +3,7 @@ from Game import Game
 from Agents import *
 
 # Set agents.
-player1_agent = BehavioralCloning_LidarBased_WithGoal_SuccesfulTrials()
+player1_agent = AdvantageBC()
 # player1_agent.with_4_action = False
 player2_agent = Roomba()
 
