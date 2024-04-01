@@ -150,30 +150,45 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
         self.obstacles = obstacles
         self.goal = goal
         self.preprocessing = uf_pp()
+        self.lidar_based_with_goal_less_beams_flag = False
         
     def calculate_lidar_measurements(self, state = None, RADIUS = WIDTH*(1/3)): 
-        # All beams:
-        lidar_density = 1
-        # Less beams:
-        # lidar_density = 10
+        lidar_based_with_goal_less_beams_flag = self.lidar_based_with_goal_less_beams_flag
+        if lidar_based_with_goal_less_beams_flag:
+            # Less beams:
+            lidar_density = 5
+        else:
+            # All beams:
+            lidar_density = 1
         measurements = self.preprocessing.calculate_lidar_measurements(state, self.obstacles, self.goal, lidar_density = lidar_density, lidar_range = RADIUS)
         # plot lidar measurements for debugging:
         # self.preprocessing.plot_lidar_measurements_on_fig(measurements, state, self.obstacles, self.goal)
         return measurements
             
     def predict_action(self, state):
+        lidar_based_with_goal_less_beams_flag = self.lidar_based_with_goal_less_beams_flag
         # Calculate lidar measurements
         measurements = self.calculate_lidar_measurements(state)
         # Flatten the measurements
         measurements = np.ravel(measurements)
+        
         # add the goal distances to the measurements
-        P1_goal_dist_x = state[0] - self.goal.rect.centerx
-        P1_goal_dist_y = state[1] - self.goal.rect.centery
+        P1_goal_dist_x = self.goal.rect.centerx - state[0]
+        P1_goal_dist_y = self.goal.rect.centery - state[1]
         measurements = np.append(measurements, [P1_goal_dist_x, P1_goal_dist_y])
         input_dim = len(measurements)
+        if lidar_based_with_goal_less_beams_flag: 
+            # New data, less beams:
+            self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_less_beams_with_goal_small_map.pkl"
+            self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_less_beams_with_goal_small_map.pth"
+        else:
+            # New data:
+            self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal_small_map.pkl"
+            self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_small_map.pth"
+
         # All beams: 
-        self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal.pkl"
-        self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth"
+        # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_with_goal.pkl"
+        # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal.pth"
         # Less beams:
         # self.scaler_path = r".\data_based_agents\scalers\scaler_pytorch_without_not_moving_less_beams_with_goal.pkl"
         # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_less_beams_with_goal.pth"       
@@ -182,7 +197,7 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
         # self.model_path = r".\data_based_agents\models\behavior_cloning_lidar_pytorch_without_not_moving_with_goal_less_epochs.pth"
         
         self.scaler = joblib.load(self.scaler_path)
-        self.model = LidarLikeNet.LidarLikeNet(input_dim=input_dim, output_dim=5) 
+        self.model = LidarLikeNet.LidarLikeNet(input_dim=input_dim, output_dim=4) # 5) 
         self.model.load_state_dict(torch.load(self.model_path))
         self.model.eval()
         
@@ -218,10 +233,10 @@ class BehavioralCloning_LidarBased_WithGoal(Agent):
             dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         return dx, dy, action
@@ -270,10 +285,10 @@ class BehavioralCloning_LidarLikeTF(Agent):
             dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         return dx, dy, action
@@ -336,10 +351,10 @@ class BehavioralCloning_LidarBased(Agent):
             dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         return dx, dy, action
@@ -461,20 +476,19 @@ class BehavioralCloning_DistancesBasedAgent(Agent):
             dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         return dx, dy, action
 
 class BehavioralCloning_ImagesBasedAgent(Agent):
-    def __init__(self, obstacles = None, goal = None, with_4_action = False):
+    def __init__(self, obstacles = None, goal = None):
         super().__init__(obstacles, goal)
         self.obstacles = obstacles
         self.goal = goal
-        self.with_4_action = False
                 
     def create_image(self, state):
         obstacles = self.obstacles
@@ -487,7 +501,7 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         if not os.path.exists(saving_path_images):
             os.makedirs(saving_path_images)
 
-        goal_x, goal_y = goal.rect.centerx, HEIGHT - goal.rect.centery
+        goal_x, goal_y = goal.rect.centerx, goal.rect.centery
         
         P1_X = state[0]
         P1_Y = state[1]
@@ -498,7 +512,7 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         plt.figure(figsize=(WIDTH/100, HEIGHT/100))
 
         # Plot the goal
-        plt.scatter(goal_x, HEIGHT - goal_y, color='green', label='Goal')
+        plt.scatter(goal_x, goal_y, color='green', marker = "s", label='Goal')
 
         # Plot the obstacles
         for obstacle in obstacles:
@@ -527,23 +541,40 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
         :param state: positions of player 1 and player 2 (format?)
         :return: dx, dy, direction
         '''
-        with_4_action = self.with_4_action
         # create image
         temp_img_path = self.create_image(state)
         # load image from temp_img_path
         image = cv2.imread(temp_img_path, cv2.IMREAD_COLOR)
+        # min value of the image
         image = cv2.resize(image, (100, 100))
+         # save the image
+        cv2.imwrite(r"./data_based_agents/images_inprocess/image.png", image)       
         # Reshape X to match model input shape
         image = image.reshape(-1, 100, 100, 3)
-
+        
         # Normalize pixel values to be between 0 and 1
         image = image.astype('float32') / 255.0
+        
+        image_shape = image.shape
+        
+        # image flatten
+        image = image.reshape(image_shape[0], -1)
+        
+        # load scaler
+        scaler_path = r".\data_based_agents\scalers\scaler_cnn_100_without_not_moving_small_map.pkl"
+        scaler = joblib.load(scaler_path)
+        # Standardize the data
+        image = scaler.transform(image)
+        
+        # Reshape the scaled data back to the original shape
+        image = image.reshape(image_shape)
 
         # Load the model
-        if with_4_action:
-            model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100.h5', compile=False)
-        else: 
-            model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_not_moving_action_removed.h5', compile=False)
+        # if with_4_action:
+        #     model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100.h5', compile=False)
+        # else: 
+        # model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_not_moving_action_removed.h5', compile=False)
+        model = load_model('.\data_based_agents\models\\behavior_cloning_cnn_100_without_not_moving_small_map.h5', compile=False)
 
         # Compile the model (recompilation is needed after loading)
         model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
@@ -565,16 +596,15 @@ class BehavioralCloning_ImagesBasedAgent(Agent):
             dx = PLAYER_SPEED
         elif predicted_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif predicted_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
         action = predicted_action
         
         # delete the image
         os.remove(temp_img_path)
         # wait for the process to finish
-        time.sleep(0.5)
         return dx, dy, action
         
         
@@ -600,10 +630,10 @@ class RandomAgent(Agent):
             dx = PLAYER_SPEED
         elif selected_action == 2:
             #up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif selected_action == 3:
             #down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
 
         return dx, dy, selected_action
 
@@ -678,12 +708,12 @@ class EpsilonLeashFollow(Agent):
                 dx = PLAYER_SPEED
         else:
             # y-axis is dominant - move up or down
-            if player1_y > player2_y: # player 1 is higher - go up
+            if player1_y < player2_y: # player 1 is higher - go up
                 action = 2
-                dy = PLAYER_SPEED
+                dy = -PLAYER_SPEED
             else: #move down
                 action = 3
-                dy = -PLAYER_SPEED
+                dy = PLAYER_SPEED
 
         return dx, dy, action
 
@@ -728,10 +758,10 @@ class EpsilonLeashFollow(Agent):
             dx = PLAYER_SPEED
         elif selected_action == 2:
             # up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif selected_action == 3:
             # down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
 
         return dx, dy, selected_action
 
@@ -773,10 +803,10 @@ class Roomba(Agent):
                 dx = PLAYER_SPEED
             elif action == 2:
                 # up
-                dy = PLAYER_SPEED
+                dy = -PLAYER_SPEED
             elif action == 3:
                 # down
-                dy = -PLAYER_SPEED
+                dy = PLAYER_SPEED
 
             self.current_action = action
             self.dx = dx
@@ -855,10 +885,10 @@ class GoalFollow(Agent):
             # move up or down
             if goal_y > player2_y: #goal is upwards - move up
                 action = 2
-                dy = PLAYER_SPEED
+                dy = -PLAYER_SPEED
             else: #goal is downwards - move down
                 action = 3
-                dy = -PLAYER_SPEED
+                dy = PLAYER_SPEED
 
         return dx, dy, action
 
@@ -900,9 +930,57 @@ class GoalFollow(Agent):
             dx = PLAYER_SPEED
         elif selected_action == 2:
             # up
-            dy = PLAYER_SPEED
+            dy = -PLAYER_SPEED
         elif selected_action == 3:
             # down
-            dy = -PLAYER_SPEED
+            dy = PLAYER_SPEED
 
         return dx, dy, selected_action
+
+class GoalFollowImproved(Agent):
+    # This robot agent goes in the direction of the goal.
+    # if the robot is close to the goal - it will try to get it
+    # no obstacle avoidance
+    def __init__(self, obstacles = None, goal = None):
+        super().__init__(obstacles, goal)
+        self.obstacles = obstacles
+        self.goal = goal
+
+    def get_state_set_action(self, state=None):
+        self.current_state = state
+
+        # defaults
+        action = 4
+        dx = 0
+        dy = 0
+
+        self.player1_x = state[0]
+        self.player1_y = state[1]
+        self.player2_x = state[2]
+        self.player2_y = state[3]
+        
+        self.goal_x = self.goal.rect.centerx
+        self.goal_y = self.goal.rect.centery
+                
+        # move towards the goal, assuming the human follows the leash
+        angle = math.atan2(self.goal_y - self.player2_y, self.goal_x - self.player2_x)
+            
+        dx = PLAYER_SPEED * math.cos(angle)
+        dy = PLAYER_SPEED * math.sin(angle)
+        
+        if abs(dx) > abs(dy):
+            if dx < 0: # move left
+                action = 0
+                dx = -PLAYER_SPEED
+            else: # move right
+                action = 1
+                dx = PLAYER_SPEED
+        else:
+            if dy < 0: # move up
+                action = 2
+                dy = -PLAYER_SPEED
+            else: # move down 
+                action = 3
+                dy = PLAYER_SPEED
+        
+        return dx, dy, action

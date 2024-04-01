@@ -1,4 +1,4 @@
-import pygame
+
 
 WIDTH = 800
 HEIGHT = 600
@@ -13,3 +13,4 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
 NUM_OBSTACLES = 10
+
