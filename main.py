@@ -2,11 +2,10 @@
 from Game import Game
 from Agents import *
 
-# Set agents.
-player1_agent = BehavioralCloning_LidarBased_WithGoal() # BehavioralCloning_ImagesBasedAgent(), # BehavioralCloning_LidarBased_WithGoal(), GoalFollowImproved()
-player1_agent.lidar_based_with_goal_less_beams_flag = False
-player2_agent = EpsilonLeashFollow() 
-# player2_agent.epsilon = 0.5
+
+player1_agent = AdvantageBC()
+# player1_agent.with_4_action = False
+player2_agent = Roomba()
 
 # Data saving flag:
 data_save_flag = False

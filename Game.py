@@ -23,7 +23,7 @@ class Game:
         self.player2_agent = player2_agent # fake-human action. None = human player
         
         self.data_save_flag = data_save_flag
-
+        self.leash_dist=0
         # initialize pygame
         pygame.init()
         self.font = pygame.font.Font(None, 36)

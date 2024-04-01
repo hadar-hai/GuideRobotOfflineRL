@@ -14,10 +14,12 @@ import cv2
 from sklearn.preprocessing import StandardScaler
 import math
 import torch
+from models import BC_model_lidar
 import torch.nn as nn
 from sklearn.preprocessing import MinMaxScaler
 import joblib
 import LidarLikeNet
+from models import LidarLikeNet01
 from useful_functions_for_data_processing import UsefulFunctions_ForPreprocessing as uf_pp
 
 
@@ -31,7 +33,117 @@ class Agent:
         self.player_ID = player_id  # player 1 (robot) or player 2 (simulated human)
         self.obstacles = obstacles
         self.goal = goal
-        
+class AdvantageBC(Agent):
+    def __init__(self,  obstacles=None, goal=None):
+            super().__init__(obstacles, goal)
+            self.obstacles = obstacles
+            self.goal = goal
+            self.preprocessing = uf_pp()
+            self.model_path = "checkpoints/bc_model.pth"
+            self.model = None
+
+    def initialize_model(self, input_dim):
+            '''Initialize and load the model based on input_dim'''
+            self.model = BC_model_lidar.BCAgent(input_dim=input_dim, output_dim=5)  # Assuming output_dim=5
+
+            self.model.load_state_dict(torch.load(self.model_path, map_location=torch.device('cpu')))
+            self.model.eval()  # Set the model to evaluation mode
+
+    def calculate_lidar_measurements(self, state=None, RADIUS=WIDTH * (1 / 3)):
+        lidar_density = 1
+        measurements = self.preprocessing.calculate_lidar_measurements(state, self.obstacles, self.goal,
+                                                                       lidar_density=lidar_density, lidar_range=RADIUS)
+
+        return measurements
+
+    def predict_action(self, state):
+        measurements = self.calculate_lidar_measurements(state)
+        measurements = np.ravel(measurements)
+        P1_goal_dist_x = state[0] - self.goal.rect.centerx
+        P1_goal_dist_y = state[1] - self.goal.rect.centery
+        measurements = np.append(measurements, [P1_goal_dist_x, P1_goal_dist_y])
+
+
+        measurements_len=len(measurements)
+        self.initialize_model(input_dim=measurements_len)
+
+        # Convert measurements to a PyTorch tensor
+        x_tensor = torch.tensor([measurements], dtype=torch.float32)
+
+        # Make predictions with the model
+        with torch.no_grad():
+            predictions = self.model(x_tensor)
+        predicted_action = predictions.argmax(dim=1).item()
+        return predicted_action
+
+    def get_state_set_action(self, state=None):
+        predicted_action = self.predict_action(state)
+        dx, dy = 0, 0
+        if predicted_action == 0:
+            dx = -PLAYER_SPEED  # Left
+        elif predicted_action == 1:
+            dx = PLAYER_SPEED  # Right
+        elif predicted_action == 2:
+            dy = -PLAYER_SPEED  # Up
+        elif predicted_action == 3:
+            dy = PLAYER_SPEED  # Down
+        return dx, dy, predicted_action
+class BehavioralCloning_LidarBased_WithGoal_SuccesfulTrials(Agent):
+    def __init__(self,  obstacles=None, goal=None):
+            super().__init__(obstacles, goal)
+            self.obstacles = obstacles
+            self.goal = goal
+            self.preprocessing = uf_pp()
+            self.model_path = "checkpoints/model_checkpoint_LIDAR_succesfultrials_1.pth"
+            self.model = None
+
+    def initialize_model(self, input_dim):
+            '''Initialize and load the model based on input_dim'''
+            self.model = LidarLikeNet01.LidarLikeNet01(input_dim=input_dim, output_dim=5)  # Assuming output_dim=5
+
+            self.model.load_state_dict(torch.load(self.model_path, map_location=torch.device('cpu')))
+            self.model.eval()  # Set the model to evaluation mode
+
+    def calculate_lidar_measurements(self, state=None, RADIUS=WIDTH * (1 / 3)):
+        lidar_density = 1
+        measurements = self.preprocessing.calculate_lidar_measurements(state, self.obstacles, self.goal,
+                                                                       lidar_density=lidar_density, lidar_range=RADIUS)
+        measurements = np.append(measurements)
+        return measurements
+
+    def predict_action(self, state):
+        measurements = self.calculate_lidar_measurements(state)
+        measurements = np.ravel(measurements)
+        P1_goal_dist_x = state[0] - self.goal.rect.centerx
+        P1_goal_dist_y = state[1] - self.goal.rect.centery
+        measurements = np.append(measurements, [P1_goal_dist_x, P1_goal_dist_y])
+
+
+        self.initialize_model(input_dim=len(measurements))
+
+        # Convert measurements to a PyTorch tensor
+        x_tensor = torch.tensor([measurements], dtype=torch.float32)
+
+        # Make predictions with the model
+        with torch.no_grad():
+            predictions = self.model(x_tensor)
+        predicted_action = predictions.argmax(dim=1).item()
+        return predicted_action
+
+    def get_state_set_action(self, state=None):
+        predicted_action = self.predict_action(state)
+        dx, dy = 0, 0
+        if predicted_action == 0:
+            dx = -PLAYER_SPEED  # Left
+        elif predicted_action == 1:
+            dx = PLAYER_SPEED  # Right
+        elif predicted_action == 2:
+            dy = -PLAYER_SPEED  # Up
+        elif predicted_action == 3:
+            dy = PLAYER_SPEED  # Down
+        return dx, dy, predicted_action
+
+
 class BehavioralCloning_LidarBased_WithGoal(Agent):
     def __init__(self, obstacles = None, goal = None):
         super().__init__(obstacles, goal)
