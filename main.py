@@ -5,7 +5,7 @@ from Agents import *
 
 player1_agent = AdvantageBC()
 # player1_agent.with_4_action = False
-player2_agent = Roomba()
+player2_agent = EpsilonLeashFollow()
 
 # Data saving flag:
 data_save_flag = False

@@ -6,11 +6,11 @@ from matplotlib.patches import Rectangle
 import pandas as pd
 import useful_functions as uf
 import os
-import pygame
+# import pygame
 import time
 from tensorflow.keras.models import load_model
 import numpy as np
-import cv2
+# import cv2
 from sklearn.preprocessing import StandardScaler
 import math
 import torch
@@ -39,7 +39,7 @@ class AdvantageBC(Agent):
             self.obstacles = obstacles
             self.goal = goal
             self.preprocessing = uf_pp()
-            self.model_path = "checkpoints/bc_model.pth"
+            self.model_path = "checkpoints/RUN_GAMMA_0.95/bc_model_1.pth"
             self.model = None
 
     def initialize_model(self, input_dim):
