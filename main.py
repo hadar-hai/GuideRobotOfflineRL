@@ -23,9 +23,9 @@ def evaluate_agents(player1_agent, player2_agent):
 
     return goal_reached
 
-no_tests = 1
+no_tests = 100
 
-agents = [GoalFollowImproved(), BehavioralCloning_LidarBased_WithGoal(), ABehavioralCloning_LidarBased_WithGoal]
+agents = [GoalFollowImproved(), BehavioralCloning_LidarBased_WithGoal(), ABehavioralCloning_LidarBased_WithGoal()]
 success_counts = [0, 0, 0]
 
 player2_agent = EpsilonLeashFollow()
