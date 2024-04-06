@@ -13,3 +13,5 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
 NUM_OBSTACLES = 0 # 3 # 6 # 30
+
+STEP_LIMIT = 300

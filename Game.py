@@ -14,7 +14,7 @@ from DataStorage import *
 
 class Game:
 
-    def __init__(self, player1_agent = None, player2_agent = None, data_save_flag = False):
+    def __init__(self, player1_agent = None, player2_agent = None, data_save_flag = False, limit_steps = False):
         # set agents
         # NOTE: if at least one of the agents it None, Game will assume both players are human and this is data collection.
 
@@ -22,6 +22,7 @@ class Game:
         self.player2_agent = player2_agent # fake-human action. None = human player
         
         self.data_save_flag = data_save_flag
+        self.limit_steps = limit_steps
         self.leash_dist=0
         # initialize pygame
         pygame.init()
@@ -85,6 +86,10 @@ class Game:
 
     def game_loop(self, running=True, goal_reached = False):
         data_save_flag = self.data_save_flag
+        limit_steps = self.limit_steps
+        if limit_steps:
+            steps_remaining = STEP_LIMIT
+
         while running:
 
             # Handle events
@@ -147,14 +152,20 @@ class Game:
             if self.reached_goal():
                 running = False
                 goal_reached = True
-                pygame.time.wait(2000)  # Wait for 2 seconds
+                # pygame.time.wait(2000)  # Wait for 2 seconds
 
             # Check if human collided with obstacle - game over
             if self.player2.collision_flag:
                 running = False
                 goal_reached = False
-                pygame.time.wait(2000)  # Wait for 2 seconds
+                # pygame.time.wait(2000)  # Wait for 2 seconds
 
+            # check if time limit was reached
+            if self.limit_steps:
+                if steps_remaining <= 0:
+                    running = False
+                    goal_reached = False
+                steps_remaining -= 1
             # Collision detection for player1 and player2
             player1_crashed = self.player1.collision_flag
             player2_crashed = self.player2.collision_flag
