@@ -11,7 +11,7 @@ BC Agent Successes
 
 <div align="center">
 
-<img src="https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/82d911cc-5f99-4ec0-ab83-3be7b22e17a6" width="300" height="200">
+<img src="https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/82d911cc-5f99-4ec0-ab83-3be7b22e17a6" width="500" height="300">
 
 Data Collection Game (x2 and then x4 to make it a gif)
 
