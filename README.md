@@ -72,10 +72,32 @@ The results highlight the effectiveness of AFBC in navigation tasks, showcasing 
 
 ## Repository Contents
 
-- `README.md`: Overview of the project, scenario description, and unique challenges using offline RL.
-- `main.py`: Main script for executing the project.
-- `Game.py`: Script containing the game logic.
-- Continue!
+| File/Folder                                            | Description                                             |
+|--------------------------------------------------------|---------------------------------------------------------|
+| `README.md`                                            | Provides an overview of the project, including scenario description and unique challenges encountered in offline RL. |
+| `main.py`                                              | The main script responsible for executing the project's functionalities. |
+| `Game.py`                                              | Contains the game logic necessary for project execution.  |
+| `checkpoints`                                          | Stores newly added checkpoints for the filtered BC agent. |
+| `data`                                                 | Large map data, raw and processed.                                    |
+| `data_based_agents`                                    | Folder for agents based on data - codes and models.                        |
+| `data_processing`                                      | Contains scripts for processing data, including adjustments for smaller map sizes. |
+| `gifs`                                                 | Folder for GIF files uploaded.                          |
+| `legacy`                                               | Repository folder for legacy files.                     |
+| `notebooks`                                            | Contains Jupyter notebooks uploaded.                    |
+| `paper`                                                | Instructions and guidelines for the final report.       |
+| `postprocessing`                                       | Folder for scripts related to post-processing tasks. |
+| `reward_value_function`    | Contains the reward value function model |
+| `smallmap_data`                                        | Data folder specifically for smaller map sizes data collection, raw and processed.         |
+| `Agents.py`                                            | Contains the agents classes. |
+| `BC_model_lidar.py`                                    | pytorch model for BC-lidar measurements based for AFBC agent |
+| `DataStorage.py`                                       | Classes for data collection during games.                         |
+| `LidarLikeNet.py`                                      | pytorch model for BC-lidar measurements based for BC agent |
+| `Map_Features.py`                                      | Contains the map features classes.                         |
+| `Players.py`                                           | Contains the players classes.         |
+| `global_parameters.py`                                 | Game gloabl parameters |
+| `useful_functions.py`                                  | General useful functions. |
+| `useful_functions_for_data_processing.py`              | Useful functions for data processing |
+
 
 ## Usage
 
