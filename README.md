@@ -9,7 +9,13 @@ BC Agent Successes
 
 </div>
 
+<div align="center">
 
+<img src="https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/892670e7-7b61-4be3-a594-733ea1613788" width="300" height="200">
+
+Data Collection Game 
+
+</div>
 
 
 ## Overview
