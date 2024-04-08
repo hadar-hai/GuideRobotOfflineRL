@@ -1,33 +1,45 @@
 # GuideRobotOfflineRL - Offline Reinforcement Learning-Based Human Guide Robot for Visually Impaired Navigation
 
-## ! Project under development !
-
 ## Overview
 
-This project illustrates a scenario in which an agent, referred to as the guide robot, is tasked with guiding a visually impaired individual through a two-dimensional obstacle-filled map towards a goal. The guide robot is connected to the individual by a leash, and the goal is to safely navigate through obstacles while ensuring the individual's safety.
+This project presents a scenario where an agent, known as the guide robot, assists a visually impaired individual in navigating a two-dimensional obstacle-filled map towards a goal. The guide robot, connected to the individual by a leash, must safely navigate through obstacles while ensuring the individual's safety.
 
-## Scenario Description
+## Scenario Description for Data Collection Human-Human Interaction
 
-In this scenario, the guide robot possesses complete knowledge of the map layout, including obstacles and the location of the visually impaired individual, throughout all time-steps. The visually impaired individual, represented in blue, lacks visibility of the map details and can only perceive a directional signal aligned with the leash's direction, indicating the leash's maximum extension.
+In this scenario, the guide robot has complete knowledge of the map layout, including obstacles and the visually impaired individual's location, throughout all time-steps. The visually impaired individual lacks detailed visibility of the map and can only perceive a directional signal aligned with the leash's direction, indicating its maximum extension.
 
 ## Unique Challenges
 
-- **Limited Perception**: The visually impaired individual can only perceive a directional signal aligned with the leash's direction, limiting their understanding of the environment.
-- **Human-like Behavior**: The visually impaired individual may act irrationally at times, influencing the situation unpredictably.
+- **Limited Perception**: The visually impaired individual's restricted understanding of the environment due to their reliance on the leash's directional signal.
+- **Human-like Behavior**: Unpredictable actions from the visually impaired individual, akin to human behavior, adding complexity to the navigation task.
 
 ## Data Collection
 
-Data collection in this project involves letting human players to play the interactive game a recording various parameters such as:
-- Guide robot's positions and actions
-- Visually impaired individual's positions and actions
-- Obstacles positions
-- Goal positions
+Data collection involves human players interacting with the game, recording various parameters such as the guide robot's positions and actions, visually impaired individual's positions and actions, obstacles positions, and goal positions.
 
-A data collection human-human interaction game (a failed one):
+## AI Agents
 
-<p align="center">
-<img src="https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/d097fe0c-f899-40dd-8ff4-17ee6caf7300" width="800" alt="data_collection_2_players">
-</p>
+The project aims to create a robust agent that learns from human demonstrations using Behavior Cloning (BC) as a baseline approach. It extends BC with Advantage-Filtered Behavioral Cloning (AFBC), a method that selectively replicates advantageous actions based on an estimated advantage function.
+
+### Dataset
+
+The data utilized for training was collected through human-human interactions in a designed environment. A total of 100 games were played, focusing on navigation tasks for visually impaired individuals.
+
+### Pre-processing and Representation of Data
+
+The collected data was pre-processed to fit the algorithm and model. Non-Markovian behavior was removed from the data to ensure consistency. Different representations of the state were explored, with the "Lidar"-like beam representation showing the best results.
+
+### Setup
+
+Three agents were tested: Baseline agent, Behavior Cloning (BC) agent, and Advantage-Filtered Behavior Cloning (AFBC) agent. Tests were conducted on maps with varying obstacles and initial player positions. Each agent played a total of 200 games.
+
+### Results
+
+Success rates for all three agents were recorded. In obstacle-free environments, the baseline agent showed higher success rates, while AFBC exhibited better performance overall, even in the presence of obstacles.
+
+### Discussion
+
+The results highlight the effectiveness of AFBC in navigation tasks, showcasing its ability to handle obstacles and adapt to varying environments. Both BC and AFBC agents occasionally exhibited "policy loops", leading to near-goal states but eventual failure.
 
 ## Partners
 
@@ -37,30 +49,29 @@ A data collection human-human interaction game (a failed one):
 
 ## Project Supervisors
 
-- [Prop. Sarah Keren](https://sarahk.cs.technion.ac.il/)
+- [Prof. Sarah Keren](https://sarahk.cs.technion.ac.il/)
 - [Or Rivlin](https://github.com/orrivlin)
 
 ## Repository Contents
 
-- `README.md`: This file provides an overview of the project, scenario description, and unique challenges using offline RL.
-- main.py
-- Game.py
-- continue!
+- `README.md`: Overview of the project, scenario description, and unique challenges using offline RL.
+- `main.py`: Main script for executing the project.
+- `Game.py`: Script containing the game logic.
+- Continue!
 
 ## Usage
 
-This project is primarily intended for research and educational purposes to explore the challenges and dynamics of guiding visually impaired individuals in complex environments.
+This project is designed for research and educational purposes, allowing exploration of the challenges and dynamics involved in guiding visually impaired individuals in complex environments.
 
 ## Contributions
 
-Contributions to this project are welcome. If you have any suggestions, improvements, or bug fixes, please feel free to submit a pull request or open an issue in the repository.
+Contributions to this project are encouraged. Feel free to submit pull requests or open issues for suggestions, improvements, or bug fixes.
 
 ## License
 
-
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
 *Note: This project is a simulation and does not involve real-world interactions with visually impaired individuals. It is meant for educational and research purposes only.*
 
-*The project was created as a part of course CS236006 of Computer Science faculty, Technion.*
-
+*The project was created as part of course CS236006 of the Computer Science faculty at Technion.*
