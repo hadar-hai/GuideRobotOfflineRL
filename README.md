@@ -1,5 +1,17 @@
 # GuideRobotOfflineRL - Offline Reinforcement Learning-Based Human Guide Robot for Visually Impaired Navigation
 
+
+<div align="center">
+
+<img src="https://github.com/hadar-hai/GuideRobotOfflineRL/assets/64587231/bc6c72ac-66ba-4f78-8a3e-af4bf0c8072f" width="300" height="200">
+
+BC Agent Successes
+
+</div>
+
+
+
+
 ## Overview
 
 This project presents a scenario where an agent, known as the guide robot, assists a visually impaired individual in navigating a two-dimensional obstacle-filled map towards a goal. The guide robot, connected to the individual by a leash, must safely navigate through obstacles while ensuring the individual's safety.
